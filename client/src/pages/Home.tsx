@@ -100,8 +100,8 @@ export default function Home() {
             </>
           )}
 
-          <div className="container relative py-12 md:py-20">
-            <div className="max-w-xl space-y-4">
+          <div className="container relative py-10 sm:py-12 md:py-20">
+            <div className="max-w-xl space-y-3 sm:space-y-4">
               {/* meta row */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
                 <span className="px-2 py-0.5 text-xs font-bold rounded border border-primary/60 text-primary bg-primary/10">
@@ -125,7 +125,7 @@ export default function Home() {
                 {f.title}
               </h1>
 
-              <p className="text-muted-foreground leading-relaxed max-w-lg line-clamp-3 drop-shadow-sm">
+              <p className="text-muted-foreground leading-relaxed max-w-lg text-sm sm:text-base line-clamp-2 sm:line-clamp-3 drop-shadow-sm">
                 {f.overview || "No overview available."}
               </p>
 
