@@ -1,21 +1,36 @@
 /*
- * MIDNIGHT MARQUEE — Home.
- * Simplified per user request: hero + Movies/Series tabs only.
- * No rails, no how-it-works. Poster grid per tab, cinematic marquee voice.
+ * MIDNIGHT MARQUEE — Home (reference: teleTV style).
+ * Featured hero (full-bleed backdrop, meta row, Watch Now + Details),
+ * then horizontal scroll rails: Trending Now + Latest Update.
+ * Movies/Series tab switcher picks which catalogue to show.
  */
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { Play, Send, Star, Loader2 } from "lucide-react";
+import {
+  Play,
+  Info,
+  Send,
+  Star,
+  Calendar,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import SiteLayout from "@/components/SiteLayout";
-import MovieCard from "@/components/MovieCard";
+import WatchButton from "@/components/WatchButton";
+import HorizontalRail, {
+  toRailItem,
+  toRailSeries,
+  type RailItem,
+} from "@/components/HorizontalRail";
 import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
 import {
   getTrending,
+  getPopular,
+  getTrendingSeries,
   getPopularSeries,
-  getTopRatedSeries,
   posterUrl,
+  movieYear,
   seriesYear,
   fetchWithError,
   type TmdbMovie,
@@ -23,64 +38,13 @@ import {
 } from "@/lib/tmdb";
 import { loadConfig } from "@/lib/config";
 
-const HERO = "/manus-storage/cinelink-hero_42b9247e.png";
-
 type Tab = "movies" | "series";
-
-function SeriesCard({ series, index = 0 }: { series: TmdbSeries; index?: number }) {
-  const year = seriesYear(series);
-  const poster = posterUrl(series.poster_path);
-
-  return (
-    <Link
-      href={`/tv/${series.id}`}
-      className="group block relative shrink-0 w-[150px] sm:w-[185px] md:w-[200px]"
-      style={{
-        animationDelay: `${index * 40}ms`,
-        animation: "fadeUp 320ms var(--ease-out) both",
-      }}
-    >
-      <div className="poster-hover relative aspect-[2/3] rounded-md overflow-hidden bg-secondary">
-        {poster ? (
-          <img
-            src={poster}
-            alt={series.name}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            <Play className="h-8 w-8" />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-        <div className="absolute bottom-2 left-2 right-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200">
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground bg-black/60 backdrop-blur-sm rounded px-2 py-1">
-            <Play className="h-3 w-3 text-gold" />
-            Watch via Telegram
-          </span>
-        </div>
-      </div>
-      <div className="mt-2.5 space-y-1">
-        <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-1">
-          {series.name}
-        </h3>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1 text-gold font-semibold">
-            <Star className="h-3 w-3 fill-gold" />
-            {series.vote_average > 0 ? series.vote_average.toFixed(1) : "—"}
-          </span>
-          {year && <span>{year}</span>}
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>("movies");
-  const [movies, setMovies] = useState<TmdbMovie[]>([]);
-  const [series, setSeries] = useState<TmdbSeries[]>([]);
+  const [featured, setFeatured] = useState<RailItem | null>(null);
+  const [trending, setTrending] = useState<RailItem[]>([]);
+  const [latest, setLatest] = useState<RailItem[]>([]);
   const [loading, setLoading] = useState(true);
   const noKey = useApiKeyMissing();
   const cfg = loadConfig();
@@ -88,14 +52,45 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([
-      fetchWithError(getTrending),
-      fetchWithError(getPopularSeries),
-    ])
-      .then(([trend, tv]) => {
+    const isMovies = tab === "movies";
+    const jobs = isMovies
+      ? [fetchWithError(getTrending), fetchWithError(getPopular)]
+      : [
+          fetchWithError(getTrendingSeries),
+          fetchWithError(getPopularSeries),
+        ];
+
+    Promise.all(jobs)
+      .then(([trend, pop]) => {
         if (cancelled) return;
-        setMovies(trend.results);
-        setSeries(tv.results);
+        if (isMovies) {
+          const t = trend.results as TmdbMovie[];
+          setFeatured(
+            t[0] ? { kind: "movie", data: t[0] } : null,
+          );
+          setTrending(
+            t.slice(1, 21).map((m) => toRailItem(m)),
+          );
+          setLatest(
+            (pop.results as TmdbMovie[])
+              .slice(0, 20)
+              .map((m) => toRailItem(m)),
+          );
+        } else {
+          const t = trend.results as TmdbSeries[];
+          setFeatured(
+            t[0] ? { kind: "series", data: t[0] } : null,
+          );
+          setTrending(
+            t.slice(1, 21).map((s) => toRailSeries(s)),
+          );
+          setLatest(
+            (pop.results as TmdbSeries[])
+              .slice(0, 20)
+              .map((s) => toRailSeries(s)),
+          );
+        }
+        window.scrollTo(0, 0);
       })
       .catch(() => {})
       .finally(() => {
@@ -104,56 +99,32 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [tab]);
 
-  const items = tab === "movies" ? movies : series;
+  const f = featured?.data as (TmdbMovie & TmdbSeries) | undefined;
+  const fYear =
+    tab === "movies"
+      ? movieYear(f as TmdbMovie)
+      : seriesYear(f as TmdbSeries);
+
+  if (!f && !loading) {
+    return (
+      <SiteLayout>
+        <div className="container py-24 text-center space-y-3">
+          <p className="font-display font-bold text-xl">Nothing on the marquee</p>
+          <p className="text-sm text-muted-foreground">
+            Check back later — the schedule updates daily.
+          </p>
+        </div>
+      </SiteLayout>
+    );
+  }
 
   return (
     <SiteLayout>
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden film-grain border-b border-border">
-        <img
-          src={HERO}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-60"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
-
-        <div className="container relative py-14 md:py-20">
-          <div className="space-y-4 max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold">
-              Tonight's Feature, Delivered by Telegram
-            </p>
-            <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground">
-              Your cinema hall.
-              <br />
-              <span className="text-gold">In your pocket.</span>
-            </h1>
-            <p className="text-muted-foreground max-w-md text-base leading-relaxed">
-              Pick a film or a series, then open Telegram — one command away
-              from the stream.
-            </p>
-            <a
-              href={`https://t.me/${cfg.telegramBotUsername}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Button
-                size="lg"
-                className="marquee-chip bg-primary text-primary-foreground font-bold gap-2.5 hover:shadow-[0_0_28px_oklch(0.78_0.15_70/0.4)] active:scale-[0.97] transition-all duration-200"
-              >
-                <Send className="h-4.5 w-4.5" />
-                Go to Bot
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
-
       {/* ── Tab switcher ─────────────────────────────────────── */}
-      <section className="container pt-10 pb-4">
-        <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-1 w-fit">
+      <div className="border-b border-border bg-background/90 backdrop-blur-xl sticky top-16 z-40">
+        <div className="container flex items-center gap-1 py-2">
           {(
             [
               { id: "movies", label: "Movies" },
@@ -173,46 +144,131 @@ export default function Home() {
             </button>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* ── Grid ─────────────────────────────────────────────── */}
-      <section className="container pb-16">
-        {noKey ? (
+      {noKey && (
+        <div className="container pt-6">
           <ApiKeyBanner />
-        ) : loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <Skeleton key={i} className="h-[280px] w-full rounded-md" />
-            ))}
-          </div>
-        ) : items.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8">
-            {items.map((item, i) =>
-              tab === "movies" ? (
-                <MovieCard key={(item as TmdbMovie).id} movie={item as TmdbMovie} index={i % 12} />
-              ) : (
-                <SeriesCard key={(item as TmdbSeries).id} series={item as TmdbSeries} index={i % 12} />
-              ),
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-24 space-y-3">
-            <p className="font-display font-bold text-xl text-foreground">
-              Nothing on the marquee
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Check back later — the schedule updates daily.
-            </p>
-          </div>
-        )}
+        </div>
+      )}
 
-        {tab === "movies" && movies.length > 0 && (
-          <div className="text-center mt-10">
-            <Link href="/search" className="text-sm text-gold hover:underline">
-              Browse all movies →
-            </Link>
+      {/* ── Featured hero ────────────────────────────────────── */}
+      {loading || !f ? (
+        <section className="container py-10">
+          <Skeleton className="h-[420px] md:h-[520px] w-full rounded-lg" />
+        </section>
+      ) : (
+        <section className="relative overflow-hidden">
+          {f.backdrop_path && (
+            <>
+              <img
+                src={posterUrl(f.backdrop_path) || ""}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/20" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/60" />
+            </>
+          )}
+
+          <div className="container relative py-12 md:py-20">
+            <div className="max-w-xl space-y-4">
+              {/* meta row */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
+                <span className="px-2 py-0.5 text-xs font-bold rounded border border-primary/60 text-primary bg-primary/10">
+                  1080p
+                </span>
+                {fYear && (
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5" /> {fYear}
+                  </span>
+                )}
+                {f.vote_average > 0 && (
+                  <span className="inline-flex items-center gap-1 text-gold">
+                    <Star className="h-3.5 w-3.5 fill-current" />{" "}
+                    {f.vote_average.toFixed(1)}
+                  </span>
+                )}
+                <span className="text-muted-foreground">
+                  {tab === "movies" ? "Featured Film" : "Featured Series"}
+                </span>
+              </div>
+
+              <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
+                {tab === "movies" ? (f as TmdbMovie).title : (f as TmdbSeries).name}
+              </h1>
+
+              <p className="text-muted-foreground leading-relaxed max-w-lg line-clamp-3 drop-shadow-sm">
+                {f.overview || "No overview available."}
+              </p>
+
+              <div className="flex flex-wrap gap-3 pt-1">
+                <WatchButton
+                  movieId={f.id}
+                  movieTitle={
+                    tab === "movies"
+                      ? (f as TmdbMovie).title
+                      : (f as TmdbSeries).name
+                  }
+                  size="lg"
+                />
+                <a
+                  href={
+                    tab === "movies"
+                      ? `/movie/${f.id}`
+                      : `/tv/${f.id}`
+                  }
+                >
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="marquee-chip border-border bg-background/70 text-foreground hover:bg-accent hover:text-foreground backdrop-blur-sm gap-2 active:scale-[0.97]"
+                  >
+                    <Info className="h-4.5 w-4.5" />
+                    Details
+                  </Button>
+                </a>
+              </div>
+            </div>
           </div>
-        )}
+        </section>
+      )}
+
+      {/* ── Rails ────────────────────────────────────────────── */}
+      <HorizontalRail
+        title="Trending Now"
+        viewAllHref="/search"
+        items={trending}
+        loading={loading}
+      />
+      <HorizontalRail
+        title="Latest Update"
+        viewAllHref="/search"
+        items={latest}
+        loading={loading}
+      />
+
+      {/* ── Bot footer CTA ───────────────────────────────────── */}
+      <section className="border-t border-border bg-card/60">
+        <div className="container py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="font-display font-bold text-lg text-foreground">
+            Stream it from Telegram —{" "}
+            <span className="text-gold">@{cfg.telegramBotUsername}</span>
+          </p>
+          <a
+            href={`https://t.me/${cfg.telegramBotUsername}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Button
+              size="sm"
+              className="marquee-chip bg-primary text-primary-foreground font-semibold gap-1.5 hover:shadow-[0_0_20px_oklch(0.78_0.15_70/0.35)] transition-shadow duration-200 active:scale-[0.97]"
+            >
+              <Send className="h-3.5 w-3.5" />
+              Go to Bot
+            </Button>
+          </a>
+        </div>
       </section>
     </SiteLayout>
   );

@@ -209,8 +209,12 @@ export async function searchSeries(
   return tmdbFetch(`/search/tv?query=${encodeURIComponent(query)}&page=${page}`);
 }
 
-export function seriesYear(s: { first_air_date?: string | null }) {
-  return s.first_air_date ? new Date(s.first_air_date).getFullYear() : null;
+export function seriesYear(s?: { first_air_date?: string | null } | null) {
+  return s?.first_air_date ? new Date(s.first_air_date).getFullYear() : null;
+}
+
+export function movieYear(m?: { release_date?: string | null } | null) {
+  return m?.release_date ? new Date(m.release_date).getFullYear() : null;
 }
 
 export async function fetchWithError<T>(fn: () => Promise<T>): Promise<T> {
