@@ -1,19 +1,12 @@
 /*
  * MIDNIGHT MARQUEE — Home (reference: teleTV style).
  * Featured hero (full-bleed backdrop, meta row, Watch Now + Details),
- * then horizontal scroll rails: Trending Now + Latest Update.
- * Movies/Series tab switcher picks which catalogue to show.
+ * then horizontal scroll sections: Movies, Series, Latest Update.
+ * No tab switcher — movies and series show as their own rails.
  */
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import {
-  Play,
-  Info,
-  Send,
-  Star,
-  Calendar,
-  Loader2,
-} from "lucide-react";
+import { Play, Info, Send, Star, Calendar, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import SiteLayout from "@/components/SiteLayout";
@@ -23,7 +16,6 @@ import HorizontalRail, {
   toRailSeries,
   type RailItem,
 } from "@/components/HorizontalRail";
-import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
 import {
   getTrending,
   getPopular,
@@ -38,58 +30,41 @@ import {
 } from "@/lib/tmdb";
 import { loadConfig } from "@/lib/config";
 
-type Tab = "movies" | "series";
-
 export default function Home() {
-  const [tab, setTab] = useState<Tab>("movies");
   const [featured, setFeatured] = useState<RailItem | null>(null);
-  const [trending, setTrending] = useState<RailItem[]>([]);
+  const [movies, setMovies] = useState<RailItem[]>([]);
+  const [series, setSeries] = useState<RailItem[]>([]);
   const [latest, setLatest] = useState<RailItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const noKey = useApiKeyMissing();
   const cfg = loadConfig();
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    const isMovies = tab === "movies";
-    const jobs = isMovies
-      ? [fetchWithError(getTrending), fetchWithError(getPopular)]
-      : [
-          fetchWithError(getTrendingSeries),
-          fetchWithError(getPopularSeries),
-        ];
-
-    Promise.all(jobs)
-      .then(([trend, pop]) => {
+    Promise.all([
+      fetchWithError(getTrending),
+      fetchWithError(getPopular),
+      fetchWithError(getTrendingSeries),
+      fetchWithError(getPopularSeries),
+    ])
+      .then(([trend, pop, trendSeries, popSeries]) => {
         if (cancelled) return;
-        if (isMovies) {
-          const t = trend.results as TmdbMovie[];
-          setFeatured(
-            t[0] ? { kind: "movie", data: t[0] } : null,
-          );
-          setTrending(
-            t.slice(1, 21).map((m) => toRailItem(m)),
-          );
-          setLatest(
-            (pop.results as TmdbMovie[])
-              .slice(0, 20)
-              .map((m) => toRailItem(m)),
-          );
-        } else {
-          const t = trend.results as TmdbSeries[];
-          setFeatured(
-            t[0] ? { kind: "series", data: t[0] } : null,
-          );
-          setTrending(
-            t.slice(1, 21).map((s) => toRailSeries(s)),
-          );
-          setLatest(
-            (pop.results as TmdbSeries[])
-              .slice(0, 20)
-              .map((s) => toRailSeries(s)),
-          );
-        }
+        const t = trend.results as TmdbMovie[];
+        setFeatured(t[0] ? { kind: "movie", data: t[0] } : null);
+        setMovies(
+          t.slice(1, 21).map((m) => toRailItem(m)),
+        );
+        setSeries(
+          (trendSeries.results as TmdbSeries[])
+            .slice(0, 20)
+            .map((s) => toRailSeries(s)),
+        );
+        setLatest(
+          (pop.results as TmdbMovie[])
+            .slice(0, 20)
+            .map((m) => toRailItem(m)),
+        );
+        void popSeries; // reserved for future section
         window.scrollTo(0, 0);
       })
       .catch(() => {})
@@ -99,59 +74,13 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [tab]);
+  }, []);
 
-  const f = featured?.data as (TmdbMovie & TmdbSeries) | undefined;
-  const fYear =
-    tab === "movies"
-      ? movieYear(f as TmdbMovie)
-      : seriesYear(f as TmdbSeries);
-
-  if (!f && !loading) {
-    return (
-      <SiteLayout>
-        <div className="container py-24 text-center space-y-3">
-          <p className="font-display font-bold text-xl">Nothing on the marquee</p>
-          <p className="text-sm text-muted-foreground">
-            Check back later — the schedule updates daily.
-          </p>
-        </div>
-      </SiteLayout>
-    );
-  }
+  const f = featured?.data as TmdbMovie | undefined;
+  const fYear = movieYear(f);
 
   return (
     <SiteLayout>
-      {/* ── Tab switcher ─────────────────────────────────────── */}
-      <div className="border-b border-border bg-background/90 backdrop-blur-xl sticky top-16 z-40">
-        <div className="container flex items-center gap-1 py-2">
-          {(
-            [
-              { id: "movies", label: "Movies" },
-              { id: "series", label: "Series" },
-            ] as { id: Tab; label: string }[]
-          ).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors duration-150 active:scale-[0.97] ${
-                tab === t.id
-                  ? "marquee-chip bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {noKey && (
-        <div className="container pt-6">
-          <ApiKeyBanner />
-        </div>
-      )}
-
       {/* ── Featured hero ────────────────────────────────────── */}
       {loading || !f ? (
         <section className="container py-10">
@@ -189,13 +118,11 @@ export default function Home() {
                     {f.vote_average.toFixed(1)}
                   </span>
                 )}
-                <span className="text-muted-foreground">
-                  {tab === "movies" ? "Featured Film" : "Featured Series"}
-                </span>
+                <span className="text-muted-foreground">Featured Film</span>
               </div>
 
               <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
-                {tab === "movies" ? (f as TmdbMovie).title : (f as TmdbSeries).name}
+                {f.title}
               </h1>
 
               <p className="text-muted-foreground leading-relaxed max-w-lg line-clamp-3 drop-shadow-sm">
@@ -203,22 +130,8 @@ export default function Home() {
               </p>
 
               <div className="flex flex-wrap gap-3 pt-1">
-                <WatchButton
-                  movieId={f.id}
-                  movieTitle={
-                    tab === "movies"
-                      ? (f as TmdbMovie).title
-                      : (f as TmdbSeries).name
-                  }
-                  size="lg"
-                />
-                <a
-                  href={
-                    tab === "movies"
-                      ? `/movie/${f.id}`
-                      : `/tv/${f.id}`
-                  }
-                >
+                <WatchButton movieId={f.id} movieTitle={f.title} size="lg" />
+                <a href={`/movie/${f.id}`}>
                   <Button
                     size="lg"
                     variant="outline"
@@ -234,11 +147,17 @@ export default function Home() {
         </section>
       )}
 
-      {/* ── Rails ────────────────────────────────────────────── */}
+      {/* ── Horizontal sections ──────────────────────────────── */}
       <HorizontalRail
-        title="Trending Now"
+        title="Movies"
         viewAllHref="/search"
-        items={trending}
+        items={movies}
+        loading={loading}
+      />
+      <HorizontalRail
+        title="Series"
+        viewAllHref="/search?type=tv"
+        items={series}
         loading={loading}
       />
       <HorizontalRail

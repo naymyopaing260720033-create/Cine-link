@@ -197,8 +197,10 @@ export async function getTrendingSeries(): Promise<TmdbListResult<TmdbSeries>> {
   return tmdbFetch("/trending/tv/week");
 }
 
-export async function getPopularSeries(): Promise<TmdbListResult<TmdbSeries>> {
-  return tmdbFetch("/tv/popular");
+export async function getPopularSeries(
+  page = 1,
+): Promise<TmdbListResult<TmdbSeries>> {
+  return tmdbFetch(`/tv/popular?page=${page}`);
 }
 
 export async function getTopRatedSeries(): Promise<TmdbListResult<TmdbSeries>> {
@@ -224,7 +226,9 @@ export function movieYear(m?: { release_date?: string | null } | null) {
   return m?.release_date ? new Date(m.release_date).getFullYear() : null;
 }
 
-export async function fetchWithError<T>(fn: () => Promise<T>): Promise<T> {
+export async function fetchWithError<T = unknown>(
+  fn: () => Promise<T>,
+): Promise<T> {
   try {
     return await fn();
   } catch (e) {
