@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import SiteLayout from "@/components/SiteLayout";
 import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
 import MovieCard from "@/components/MovieCard";
+import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import SeriesCard from "@/components/SeriesCard";
 import {
   searchMovies,
@@ -158,8 +159,14 @@ export default function Search() {
       )}
       <section className="container pb-16">
         {searching && !results ? (
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i}>
+                <MarqueeSkeleton className="aspect-[2/3] w-full" />
+                <MarqueeSkeleton className="h-4 w-3/4 mt-2.5" />
+                <MarqueeSkeleton className="h-3 w-1/2 mt-2" />
+              </div>
+            ))}
           </div>
         ) : results && results.length > 0 ? (
           <>

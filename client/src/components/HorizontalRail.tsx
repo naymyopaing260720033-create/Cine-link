@@ -9,7 +9,7 @@ import { Link } from "wouter";
 import { ChevronLeft, ChevronRight, Star, Calendar, Play } from "lucide-react";
 import type { TmdbMovie, TmdbSeries } from "@/lib/tmdb";
 import { posterUrl, movieYear, seriesYear, getGenres } from "@/lib/tmdb";
-import { Skeleton } from "@/components/ui/skeleton";
+import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 
 export type RailItem =
   | { kind: "movie"; data: TmdbMovie }
@@ -139,9 +139,9 @@ export default function HorizontalRail({
             {loading
               ? Array.from({ length: 7 }).map((_, i) => (
                   <div key={i} className="shrink-0 w-[120px] sm:w-[165px]">
-                    <Skeleton className="h-[200px] sm:h-[280px] w-full rounded-md" />
-                    <Skeleton className="h-4 w-3/4 mt-2.5" />
-                    <Skeleton className="h-3 w-1/2 mt-2" />
+                    <MarqueeSkeleton className="h-[200px] sm:h-[280px] w-full" />
+                    <MarqueeSkeleton className="h-4 w-3/4 mt-2.5" />
+                    <MarqueeSkeleton className="h-3 w-1/2 mt-2" />
                   </div>
                 ))
               : items.map((item, i) => (

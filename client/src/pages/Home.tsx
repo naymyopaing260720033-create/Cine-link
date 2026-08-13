@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Play, Info, Send, Star, Calendar, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import SiteLayout from "@/components/SiteLayout";
 import WatchButton from "@/components/WatchButton";
 import HorizontalRail, {
@@ -83,8 +83,19 @@ export default function Home() {
     <SiteLayout>
       {/* ── Featured hero ────────────────────────────────────── */}
       {loading || !f ? (
-        <section className="container py-10">
-          <Skeleton className="h-[420px] md:h-[520px] w-full rounded-lg" />
+        <section className="container relative overflow-hidden py-10">
+          <div className="relative h-[420px] md:h-[520px] w-full rounded-lg bg-secondary">
+            <MarqueeSkeleton className="absolute inset-0 rounded-lg" />
+            <div className="absolute bottom-8 left-6 space-y-3 max-w-md">
+              <MarqueeSkeleton className="h-4 w-2/3" />
+              <MarqueeSkeleton className="h-10 w-4/5" />
+              <MarqueeSkeleton className="h-4 w-full" />
+              <div className="flex gap-3 pt-2">
+                <MarqueeSkeleton className="h-10 w-36" />
+                <MarqueeSkeleton className="h-10 w-24" />
+              </div>
+            </div>
+          </div>
         </section>
       ) : (
         <section className="relative overflow-hidden">
