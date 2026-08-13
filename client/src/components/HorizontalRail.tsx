@@ -138,8 +138,8 @@ export default function HorizontalRail({
           >
             {loading
               ? Array.from({ length: 7 }).map((_, i) => (
-                  <div key={i} className="shrink-0 w-[150px] sm:w-[185px]">
-                    <Skeleton className="h-[280px] w-full rounded-md" />
+                  <div key={i} className="shrink-0 w-[120px] sm:w-[165px]">
+                    <Skeleton className="h-[200px] sm:h-[280px] w-full rounded-md" />
                     <Skeleton className="h-4 w-3/4 mt-2.5" />
                     <Skeleton className="h-3 w-1/2 mt-2" />
                   </div>
@@ -179,13 +179,13 @@ function RailCard({ item, index = 0 }: { item: RailItem; index?: number }) {
   return (
     <Link
       href={itemHref(item)}
-      className="group block relative shrink-0 w-[150px] sm:w-[185px] snap-start"
+      className="group block relative shrink-0 w-[120px] sm:w-[165px] snap-start"
       style={{
         animationDelay: `${index * 40}ms`,
         animation: "fadeUp 320ms var(--ease-out) both",
       }}
     >
-      <div className="relative aspect-[2/3] rounded-md overflow-hidden bg-secondary">
+      <div className="relative aspect-[2/3] rounded-md overflow-hidden bg-secondary [&>*:first-child]:object-cover">
         {poster ? (
           <img
             src={poster}
