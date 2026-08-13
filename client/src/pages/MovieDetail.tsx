@@ -66,8 +66,10 @@ export default function MovieDetail() {
   if (loading) {
     return (
       <SiteLayout>
-        <div className="container py-12 grid md:grid-cols-[320px_1fr] gap-10">
-          <MarqueeSkeleton className="h-[480px] w-full" />
+        <div className="container py-12 grid md:grid-cols-[240px_minmax(0,1fr)] gap-8 md:gap-12">
+          <div className="w-full max-w-[220px] md:max-w-[240px] mx-auto md:mx-0">
+            <MarqueeSkeleton className="aspect-[2/3] w-full" />
+          </div>
           <div className="space-y-4">
             <MarqueeSkeleton className="h-10 w-3/4" />
             <MarqueeSkeleton className="h-5 w-1/3" />
@@ -144,13 +146,13 @@ export default function MovieDetail() {
           Go back
         </Link>
 
-        <div className="grid md:grid-cols-[320px_1fr] gap-10 md:gap-14">
+        <div className="grid gap-8 md:grid-cols-[240px_minmax(0,1fr)] md:gap-12">
           {/* poster rail */}
-          <div className="shrink-0">
+          <div className="w-full max-w-[220px] md:max-w-[240px] mx-auto md:mx-0">
             <img
-              src={posterUrl(movie.poster_path, "w780") || ""}
+              src={posterUrl(movie.poster_path, "w342") || ""}
               alt={movie.title}
-              className="rounded-lg shadow-2xl border border-border w-full max-w-[320px] mx-auto"
+              className="block aspect-[2/3] object-cover rounded-lg shadow-2xl border border-border w-full"
             />
             <div className="mt-5">
               <FavoriteButton item={favoriteFromMovie(movie)} className="mb-3 w-full" />
