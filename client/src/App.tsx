@@ -9,6 +9,7 @@ import Search from "./pages/Search";
 import MovieDetail from "./pages/MovieDetail";
 import GenrePage from "./pages/GenrePage";
 import Admin from "./pages/Admin";
+import TvDetail from "./pages/TvDetail";
 
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path={"/search"} component={Search} />
       <Route path={"/movie/:id"} component={MovieDetail} />
       <Route path={"/genre/:id"} component={GenrePage} />
+      <Route path={"/tv/:id"} component={TvDetail} />
       <Route path={"/admin"} component={Admin} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

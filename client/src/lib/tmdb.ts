@@ -76,6 +76,38 @@ export interface Genre {
   name: string;
 }
 
+export interface TmdbSeries {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  first_air_date: string;
+  vote_average: number;
+  vote_count: number;
+  popularity: number;
+  genre_ids: number[];
+  origin_country: string[];
+}
+
+export interface TmdbSeriesDetail extends TmdbSeries {
+  genres: { id: number; name: string }[];
+  number_of_seasons: number;
+  number_of_episodes: number;
+  tagline: string;
+  status: string;
+  created_by: { name: string }[];
+  videos?: { results: TmdbVideo[] };
+  credits?: {
+    cast: {
+      id: number;
+      name: string;
+      character: string;
+      profile_path: string | null;
+    }[];
+  };
+}
+
 let cachedKey: string | null = null;
 let keyChecked = false;
 
@@ -150,6 +182,35 @@ export async function getGenres(): Promise<Genre[]> {
     genres: Genre[];
   };
   return data.genres;
+}
+
+/* ── TV Series ─────────────────────────────────────────────── */
+
+export async function getTrendingSeries(): Promise<TmdbListResult<TmdbSeries>> {
+  return tmdbFetch("/trending/tv/week");
+}
+
+export async function getPopularSeries(): Promise<TmdbListResult<TmdbSeries>> {
+  return tmdbFetch("/tv/popular");
+}
+
+export async function getTopRatedSeries(): Promise<TmdbListResult<TmdbSeries>> {
+  return tmdbFetch("/tv/top_rated");
+}
+
+export async function getSeries(id: number): Promise<TmdbSeriesDetail> {
+  return tmdbFetch<TmdbSeriesDetail>(`/tv/${id}?append_to_response=videos,credits`);
+}
+
+export async function searchSeries(
+  query: string,
+  page = 1,
+): Promise<TmdbListResult<TmdbSeries>> {
+  return tmdbFetch(`/search/tv?query=${encodeURIComponent(query)}&page=${page}`);
+}
+
+export function seriesYear(s: { first_air_date?: string | null }) {
+  return s.first_air_date ? new Date(s.first_air_date).getFullYear() : null;
 }
 
 export async function fetchWithError<T>(fn: () => Promise<T>): Promise<T> {
