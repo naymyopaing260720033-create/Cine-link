@@ -10,6 +10,8 @@ import { ChevronLeft, ChevronRight, Star, Calendar, Play } from "lucide-react";
 import type { TmdbMovie, TmdbSeries } from "@/lib/tmdb";
 import { posterUrl, movieYear, seriesYear, getGenres } from "@/lib/tmdb";
 import MarqueeSkeleton from "@/components/MarqueeSkeleton";
+import FavoriteButton from "@/components/FavoriteButton";
+import { favoriteFromMovie, favoriteFromSeries } from "@/hooks/useFavorites";
 
 export type RailItem =
   | { kind: "movie"; data: TmdbMovie }
@@ -177,60 +179,64 @@ function RailCard({ item, index = 0 }: { item: RailItem; index?: number }) {
   }, [item]);
 
   return (
-    <Link
-      href={itemHref(item)}
-      className="group block relative shrink-0 w-[120px] sm:w-[165px] snap-start"
+    <div
+      className="group relative shrink-0 w-[120px] sm:w-[165px] snap-start"
       style={{
         animationDelay: `${index * 40}ms`,
         animation: "fadeUp 320ms var(--ease-out) both",
       }}
     >
-      <div className="relative aspect-[2/3] rounded-md overflow-hidden bg-secondary [&>*:first-child]:object-cover">
-        {poster ? (
-          <img
-            src={poster}
-            alt={title}
-            loading="lazy"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            <Play className="h-8 w-8" />
+      <Link href={itemHref(item)} className="block">
+        <div className="relative aspect-[2/3] rounded-md overflow-hidden bg-secondary [&>*:first-child]:object-cover">
+          {poster ? (
+            <img
+              src={poster}
+              alt={title}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+              <Play className="h-8 w-8" />
+            </div>
+          )}
+          <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded bg-black/75 text-gold border border-gold/40 backdrop-blur-sm">
+            {badge}
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          <div className="absolute bottom-2 left-2 right-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground bg-black/60 backdrop-blur-sm rounded px-2 py-1">
+              <Play className="h-3 w-3 text-gold" />
+              Watch via Telegram
+            </span>
           </div>
-        )}
-        {/* quality badge */}
-        <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded bg-black/75 text-gold border border-gold/40 backdrop-blur-sm">
-          {badge}
-        </span>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-        <div className="absolute bottom-2 left-2 right-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200">
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground bg-black/60 backdrop-blur-sm rounded px-2 py-1">
-            <Play className="h-3 w-3 text-gold" />
-            Watch via Telegram
-          </span>
         </div>
-      </div>
 
-      {/* meta */}
-      <h3 className="mt-2.5 text-sm font-semibold text-foreground leading-snug line-clamp-2 min-h-[2.6em]">
-        {title}
-      </h3>
-      <div className="mt-1 flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
-        {rating > 0 && (
-          <span className="inline-flex items-center gap-1 rounded border border-gold/40 bg-gold/10 px-1.5 py-0.5 text-gold font-semibold">
-            <Star className="h-3 w-3 fill-current" />
-            {rating.toFixed(1)}
-          </span>
-        )}
-        {year && (
-          <span className="inline-flex items-center gap-1">
-            <Calendar className="h-3 w-3" /> {year}
-          </span>
-        )}
-        {genres.length > 0 && (
-          <span className="truncate">{genres.join(", ")}</span>
-        )}
-      </div>
-    </Link>
+        <h3 className="mt-2.5 text-sm font-semibold text-foreground leading-snug line-clamp-2 min-h-[2.6em]">
+          {title}
+        </h3>
+        <div className="mt-1 flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
+          {rating > 0 && (
+            <span className="inline-flex items-center gap-1 rounded border border-gold/40 bg-gold/10 px-1.5 py-0.5 text-gold font-semibold">
+              <Star className="h-3 w-3 fill-current" />
+              {rating.toFixed(1)}
+            </span>
+          )}
+          {year && (
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3 w-3" /> {year}
+            </span>
+          )}
+          {genres.length > 0 && (
+            <span className="truncate">{genres.join(", ")}</span>
+          )}
+        </div>
+      </Link>
+      <FavoriteButton
+        item={item.kind === "movie" ? favoriteFromMovie(item.data as TmdbMovie) : favoriteFromSeries(item.data as TmdbSeries)}
+        iconOnly
+        className="absolute right-2 top-2 z-10 h-7 w-7 rounded-full p-0 bg-background/75 backdrop-blur-sm"
+      />
+    </div>
   );
 }

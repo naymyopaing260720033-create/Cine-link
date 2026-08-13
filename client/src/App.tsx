@@ -10,6 +10,8 @@ import MovieDetail from "./pages/MovieDetail";
 import GenrePage from "./pages/GenrePage";
 import Admin from "./pages/Admin";
 import TvDetail from "./pages/TvDetail";
+import Favorites from "./pages/Favorites";
+import { FavoritesProvider } from "./hooks/useFavorites";
 
 
 function Router() {
@@ -20,6 +22,7 @@ function Router() {
       <Route path={"/movie/:id"} component={MovieDetail} />
       <Route path={"/genre/:id"} component={GenrePage} />
       <Route path={"/tv/:id"} component={TvDetail} />
+      <Route path={"/favorites"} component={Favorites} />
       <Route path={"/admin"} component={Admin} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
@@ -37,10 +40,12 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <FavoritesProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </FavoritesProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

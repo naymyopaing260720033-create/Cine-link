@@ -5,10 +5,11 @@
  */
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
-import { Search, Send, Menu, X } from "lucide-react";
+import { Search, Send, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { loadConfig } from "@/lib/config";
 import { toast } from "sonner";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const LOGO = "/manus-storage/cinelink-logo_12bdb54e.png";
 
@@ -16,6 +17,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
   const cfg = loadConfig();
+  const { favorites } = useFavorites();
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -23,6 +25,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
     { href: `/genre/28`, label: "Action" },
     { href: `/genre/18`, label: "Drama" },
     { href: `/genre/35`, label: "Comedy" },
+    { href: "/favorites", label: "Favorites" },
   ];
 
   return (
@@ -57,6 +60,22 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </nav>
 
           <div className="flex items-center gap-2">
+            <Link
+              href="/favorites"
+              aria-label={`Favorites${favorites.length ? ` (${favorites.length})` : ""}`}
+              className={`relative hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+                location === "/favorites"
+                  ? "text-gold bg-accent"
+                  : "text-muted-foreground hover:text-gold"
+              }`}
+            >
+              <Heart className="h-4.5 w-4.5" />
+              {favorites.length > 0 && (
+                <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] font-bold leading-4 text-primary-foreground">
+                  {favorites.length > 9 ? "9+" : favorites.length}
+                </span>
+              )}
+            </Link>
             <Link href="/search">
               <Button
                 variant="ghost"

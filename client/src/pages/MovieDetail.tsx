@@ -18,6 +18,8 @@ import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import SiteLayout from "@/components/SiteLayout";
 import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
 import WatchButton, { WatchInstructions } from "@/components/WatchButton";
+import FavoriteButton from "@/components/FavoriteButton";
+import { favoriteFromMovie } from "@/hooks/useFavorites";
 import {
   getMovie,
   getTrending,
@@ -151,6 +153,7 @@ export default function MovieDetail() {
               className="rounded-lg shadow-2xl border border-border w-full max-w-[320px] mx-auto"
             />
             <div className="mt-5">
+              <FavoriteButton item={favoriteFromMovie(movie)} className="mb-3 w-full" />
               <WatchButton movieId={movie.id} movieTitle={movie.title} />
               <WatchInstructions movieId={movie.id} />
             </div>

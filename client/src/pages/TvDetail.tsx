@@ -17,6 +17,8 @@ import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import SiteLayout from "@/components/SiteLayout";
 import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
 import WatchButton, { WatchInstructions } from "@/components/WatchButton";
+import FavoriteButton from "@/components/FavoriteButton";
+import { favoriteFromSeries } from "@/hooks/useFavorites";
 import SeriesCard from "@/components/SeriesCard";
 import {
   getSeries,
@@ -144,6 +146,7 @@ export default function TvDetail() {
               className="rounded-lg shadow-2xl border border-border w-full max-w-[320px] mx-auto"
             />
             <div className="mt-5">
+              <FavoriteButton item={favoriteFromSeries(series)} className="mb-3 w-full" />
               <WatchButton movieId={series.id} movieTitle={series.name} />
               <WatchInstructions movieId={series.id} />
             </div>
