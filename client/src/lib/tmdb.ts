@@ -116,7 +116,11 @@ function getKey(): string {
     throw new Error("NO_KEY");
   }
   if (cachedKey) return cachedKey;
-  const key = import.meta.env.VITE_TMDB_API_KEY as string | undefined;
+  // Hardcoded default key (TMDB keys are client-safe). In production the
+  // VITE_TMDB_API_KEY env var (e.g. on Vercel) takes precedence if set.
+  const key =
+    (import.meta.env.VITE_TMDB_API_KEY as string | undefined)?.trim() ||
+    FALLBACK_KEY;
   if (!key) {
     keyChecked = true;
     cachedKey = null;
@@ -136,8 +140,11 @@ async function tmdbFetch<T>(endpoint: string): Promise<T> {
 }
 
 export function isApiKeyMissing(): boolean {
-  return !import.meta.env.VITE_TMDB_API_KEY;
+  const env = (import.meta.env.VITE_TMDB_API_KEY as string | undefined)?.trim();
+  return !env && !FALLBACK_KEY;
 }
+
+export const FALLBACK_KEY = "106567c882666997d5b9c7465d45fd60";
 
 export async function getTrending(): Promise<TmdbListResult<TmdbMovie>> {
   return tmdbFetch("/trending/movie/week");
