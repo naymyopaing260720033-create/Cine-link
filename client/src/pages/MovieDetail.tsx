@@ -154,9 +154,20 @@ export default function MovieDetail() {
               alt={movie.title}
               className="block aspect-[2/3] object-cover rounded-lg shadow-2xl border border-border w-full"
             />
-            <div className="mt-5">
-              <FavoriteButton item={favoriteFromMovie(movie)} className="mb-3 w-full" />
-              <WatchButton movieId={movie.id} movieTitle={movie.title} />
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <WatchButton
+                  movieId={movie.id}
+                  movieTitle={movie.title}
+                  size="sm"
+                  className="flex-1 justify-center px-3 py-2 text-[0.72rem] leading-none"
+                />
+                <FavoriteButton
+                  item={favoriteFromMovie(movie)}
+                  iconOnly
+                  className="h-9 w-9 shrink-0 p-0"
+                />
+              </div>
               <WatchInstructions movieId={movie.id} />
             </div>
           </div>

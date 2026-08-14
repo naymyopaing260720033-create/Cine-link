@@ -86,8 +86,13 @@ export default function WatchButton({
   }
 
   return (
-    <a href={href} target="_blank" rel="noreferrer" className="inline-block">
-              <Button
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={`inline-flex min-w-0 ${className}`}
+    >
+      <Button
         size={btnSize}
         className={`marquee-chip bg-primary text-primary-foreground font-bold gap-2.5 hover:shadow-[0_0_28px_oklch(0.78_0.15_70/0.4)] hover:brightness-105 active:scale-[0.97] transition-all duration-200 ${sizes[size]} ${className}`}
       >

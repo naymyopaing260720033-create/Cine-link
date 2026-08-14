@@ -24,6 +24,7 @@ export default function FavoriteButton({
     <button
       type="button"
       aria-label={saved ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
+      title={saved ? `Remove ${item.title} from favorites` : `Add ${item.title} to favorites`}
       aria-pressed={saved}
       onClick={(event) => {
         event.preventDefault();
@@ -46,4 +47,3 @@ export default function FavoriteButton({
     </button>
   );
 }
-
