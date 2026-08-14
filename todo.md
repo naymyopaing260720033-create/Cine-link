@@ -38,3 +38,9 @@
 - [x] Inspect the mobile hero height and the gap before the Movies section.
 - [x] Tighten the mobile-only hero spacing without changing the desktop composition.
 - [x] Verify the revised layout at mobile and desktop widths.
+
+## Conditional Continue Watching Spacing
+
+- [x] Inspect spacing when Continue Watching is present versus absent.
+- [x] Apply separate compact spacing for both Home states.
+- [x] Verify both states at mobile and desktop widths.

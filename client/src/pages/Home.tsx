@@ -191,7 +191,7 @@ export default function Home() {
       )}
 
       {continueEntry && (
-        <section className="container py-6 sm:py-8">
+        <section className="container py-4 sm:py-6">
           <div className="flex items-end justify-between gap-4 mb-4">
             <div>
               <p className="text-[0.68rem] uppercase tracking-[0.24em] text-gold font-semibold">
@@ -243,12 +243,14 @@ export default function Home() {
       )}
 
       {/* ── Horizontal sections ──────────────────────────────── */}
-      <HorizontalRail
-        title="Movies"
-        viewAllHref="/search"
-        items={movies}
-        loading={loading}
-      />
+      <div className={continueEntry ? "-mt-2 sm:-mt-1" : "-mt-3 sm:-mt-2"}>
+        <HorizontalRail
+          title="Movies"
+          viewAllHref="/search"
+          items={movies}
+          loading={loading}
+        />
+      </div>
       <HorizontalRail
         title="Series"
         viewAllHref="/search?type=tv"
