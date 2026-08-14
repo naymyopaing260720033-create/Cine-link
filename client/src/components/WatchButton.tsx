@@ -10,12 +10,16 @@ import { Button } from "@/components/ui/button";
 import {
   loadConfig,
   telegramDeepLink,
+  telegramSeriesStartLink,
   telegramStartLink,
 } from "@/lib/config";
 
 export default function WatchButton({
   movieId,
   movieTitle,
+  mediaType = "movie",
+  seasonNumber,
+  episodeNumber,
   size = "lg",
   // note: button size prop accepts 'lg' | 'default' | 'sm' (others mapped below)
   variant = "solid",
@@ -23,6 +27,9 @@ export default function WatchButton({
 }: {
   movieId?: number;
   movieTitle: string;
+  mediaType?: "movie" | "series";
+  seasonNumber?: number;
+  episodeNumber?: number;
   size?: "lg" | "md" | "sm";
   variant?: "solid" | "outline";
   className?: string;
@@ -30,11 +37,28 @@ export default function WatchButton({
   const cfg = loadConfig();
   const [copied, setCopied] = useState(false);
 
-  const href = movieId
-    ? telegramStartLink(cfg.telegramBotUsername, movieId)
-    : telegramDeepLink(cfg.telegramBotUsername, cfg.telegramMessage);
+  const isEpisode =
+    mediaType === "series" &&
+    movieId !== undefined &&
+    seasonNumber !== undefined &&
+    episodeNumber !== undefined;
 
-  const sendCommand = movieId ? `/movie ${movieId}` : `/movie`;
+  const href = isEpisode
+    ? telegramSeriesStartLink(
+        cfg.telegramBotUsername,
+        movieId,
+        seasonNumber,
+        episodeNumber,
+      )
+    : movieId
+      ? telegramStartLink(cfg.telegramBotUsername, movieId)
+      : telegramDeepLink(cfg.telegramBotUsername, cfg.telegramMessage);
+
+  const sendCommand = isEpisode
+    ? `/series ${movieId} ${seasonNumber} ${episodeNumber}`
+    : movieId
+      ? `/movie ${movieId}`
+      : `/movie`;
 
   const btnSize =
     size === "lg" ? ("lg" as const) : size === "md" ? ("default" as const) : ("sm" as const);

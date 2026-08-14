@@ -52,3 +52,12 @@ export function telegramDeepLink(botUsername: string, message: string): string {
 export function telegramStartLink(botUsername: string, movieId: number): string {
   return `https://t.me/${botUsername}?start=movie_${movieId}`;
 }
+
+export function telegramSeriesStartLink(
+  botUsername: string,
+  seriesId: number,
+  seasonNumber: number,
+  episodeNumber: number,
+): string {
+  return `https://t.me/${botUsername}?start=series_${seriesId}_s${seasonNumber}_e${episodeNumber}`;
+}

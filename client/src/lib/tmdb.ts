@@ -94,6 +94,7 @@ export interface TmdbSeriesDetail extends TmdbSeries {
   genres: { id: number; name: string }[];
   number_of_seasons: number;
   number_of_episodes: number;
+  seasons?: TmdbSeasonSummary[];
   tagline: string;
   status: string;
   created_by: { name: string }[];
@@ -106,6 +107,39 @@ export interface TmdbSeriesDetail extends TmdbSeries {
       profile_path: string | null;
     }[];
   };
+}
+
+export interface TmdbSeasonSummary {
+  id: number;
+  name: string;
+  overview: string;
+  season_number: number;
+  episode_count: number;
+  air_date: string | null;
+  poster_path: string | null;
+}
+
+export interface TmdbEpisode {
+  id: number;
+  name: string;
+  overview: string;
+  air_date: string | null;
+  episode_number: number;
+  season_number: number;
+  still_path: string | null;
+  vote_average: number;
+  vote_count: number;
+  runtime: number | null;
+}
+
+export interface TmdbSeasonDetail {
+  id: number;
+  name: string;
+  overview: string;
+  season_number: number;
+  air_date: string | null;
+  poster_path: string | null;
+  episodes: TmdbEpisode[];
 }
 
 let cachedKey: string | null = null;
@@ -209,6 +243,13 @@ export async function getTopRatedSeries(): Promise<TmdbListResult<TmdbSeries>> {
 
 export async function getSeries(id: number): Promise<TmdbSeriesDetail> {
   return tmdbFetch<TmdbSeriesDetail>(`/tv/${id}?append_to_response=videos,credits`);
+}
+
+export async function getSeriesSeason(
+  seriesId: number,
+  seasonNumber: number,
+): Promise<TmdbSeasonDetail> {
+  return tmdbFetch<TmdbSeasonDetail>(`/tv/${seriesId}/season/${seasonNumber}`);
 }
 
 export async function searchSeries(
