@@ -2,7 +2,7 @@
  * MIDNIGHT MARQUEE — Series detail.
  * Same split layout as movie detail; seasons/episodes metadata instead of runtime.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
   Star,
@@ -16,9 +16,10 @@ import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import SiteLayout from "@/components/SiteLayout";
 import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
 import TrailerPanel from "@/components/TrailerPanel";
-import WatchButton, { WatchInstructions } from "@/components/WatchButton";
+import WatchButton from "@/components/WatchButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromSeries } from "@/hooks/useFavorites";
+import { useContinueWatching } from "@/hooks/useContinueWatching";
 import SeriesCard from "@/components/SeriesCard";
 import {
   Select,
@@ -48,10 +49,16 @@ export default function TvDetail() {
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
   const [season, setSeason] = useState<TmdbSeasonDetail | null>(null);
   const [selectedEpisodeNumber, setSelectedEpisodeNumber] = useState<number | null>(null);
+  const [hasUserSelectedEpisode, setHasUserSelectedEpisode] = useState(false);
   const [seasonLoading, setSeasonLoading] = useState(false);
   const [seasonError, setSeasonError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const restoreTarget = useRef<{ seasonNumber: number; episodeNumber: number } | null>(null);
+  const { entry: continueEntry, save: saveContinueWatching } = useContinueWatching();
   const noKey = useApiKeyMissing();
+  const selectedEpisode: TmdbEpisode | undefined = season?.episodes.find(
+    (episode) => episode.episode_number === selectedEpisodeNumber,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +86,33 @@ export default function TvDetail() {
     if (!series) return;
     const firstSeason =
       series.seasons?.find((item) => item.season_number > 0) ?? series.seasons?.[0];
-    setSelectedSeasonNumber(firstSeason?.season_number ?? null);
+    const params = new URLSearchParams(window.location.search);
+    const requestedSeason = Number(params.get("season"));
+    const requestedEpisode = Number(params.get("episode"));
+    const savedSeason = continueEntry?.seriesId === series.id
+      ? continueEntry.seasonNumber
+      : null;
+    const savedEpisode = continueEntry?.seriesId === series.id
+      ? continueEntry.episodeNumber
+      : null;
+    const requestedSeasonOption = series.seasons?.find(
+      (item) => item.season_number === requestedSeason,
+    );
+    const savedSeasonOption = series.seasons?.find(
+      (item) => item.season_number === savedSeason,
+    );
+    const seasonNumber =
+      requestedSeasonOption?.season_number ??
+      savedSeasonOption?.season_number ??
+      firstSeason?.season_number ??
+      null;
+
+    restoreTarget.current = {
+      seasonNumber: seasonNumber ?? 0,
+      episodeNumber: requestedEpisode || savedEpisode || 0,
+    };
+    setHasUserSelectedEpisode(Boolean(requestedSeason || requestedEpisode));
+    setSelectedSeasonNumber(seasonNumber);
   }, [series?.id]);
 
   useEffect(() => {
@@ -99,7 +132,14 @@ export default function TvDetail() {
       .then((data) => {
         if (cancelled) return;
         setSeason(data);
-        setSelectedEpisodeNumber(data.episodes[0]?.episode_number ?? null);
+        const target = restoreTarget.current;
+        const restoredEpisode = target?.seasonNumber === selectedSeasonNumber
+          ? data.episodes.find((episode) => episode.episode_number === target.episodeNumber)
+          : undefined;
+        setSelectedEpisodeNumber(
+          restoredEpisode?.episode_number ?? data.episodes[0]?.episode_number ?? null,
+        );
+        restoreTarget.current = null;
       })
       .catch(() => {
         if (!cancelled) setSeasonError(true);
@@ -112,6 +152,39 @@ export default function TvDetail() {
       cancelled = true;
     };
   }, [series, selectedSeasonNumber]);
+
+  useEffect(() => {
+    if (
+      !hasUserSelectedEpisode ||
+      !series ||
+      !selectedEpisode ||
+      selectedSeasonNumber === null
+    ) return;
+    if (continueEntry?.seriesId === series.id && continueEntry.updatedAt > 0) {
+      const isRestoredSelection =
+        continueEntry.seasonNumber === selectedSeasonNumber &&
+        continueEntry.episodeNumber === selectedEpisode.episode_number;
+      if (isRestoredSelection) return;
+    }
+
+    saveContinueWatching({
+      seriesId: series.id,
+      seriesTitle: series.name,
+      posterPath: series.poster_path,
+      seasonNumber: selectedSeasonNumber,
+      episodeNumber: selectedEpisode.episode_number,
+      episodeName: selectedEpisode.name || "Untitled episode",
+      overview: selectedEpisode.overview || "",
+      airDate: selectedEpisode.air_date,
+    });
+  }, [
+    series?.id,
+    series?.name,
+    series?.poster_path,
+    selectedSeasonNumber,
+    selectedEpisode?.id,
+    hasUserSelectedEpisode,
+  ]);
 
   if (loading) {
     return (
@@ -164,9 +237,6 @@ export default function TvDetail() {
     (v) => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser"),
   );
   const cast = series.credits?.cast?.slice(0, 6) ?? [];
-  const selectedEpisode: TmdbEpisode | undefined = season?.episodes.find(
-    (episode) => episode.episode_number === selectedEpisodeNumber,
-  );
   const seasonLabel = (seasonNumber: number) =>
     seasonNumber === 0 ? "Specials" : `Season ${seasonNumber}`;
 
@@ -279,7 +349,10 @@ export default function TvDetail() {
                         ? undefined
                         : String(selectedSeasonNumber)
                     }
-                    onValueChange={(value) => setSelectedSeasonNumber(Number(value))}
+                    onValueChange={(value) => {
+                      setHasUserSelectedEpisode(true);
+                      setSelectedSeasonNumber(Number(value));
+                    }}
                   >
                     <SelectTrigger className="w-full sm:w-[190px] border-primary/40 bg-secondary/40">
                       <SelectValue placeholder="Choose season" />
@@ -322,7 +395,10 @@ export default function TvDetail() {
                         <button
                           key={episode.id}
                           type="button"
-                          onClick={() => setSelectedEpisodeNumber(episode.episode_number)}
+                          onClick={() => {
+                            setHasUserSelectedEpisode(true);
+                            setSelectedEpisodeNumber(episode.episode_number);
+                          }}
                           className={`text-left rounded-lg border p-3 transition-all duration-200 active:scale-[0.98] ${
                             isSelected
                               ? "border-primary bg-primary/10 shadow-[0_0_22px_oklch(0.78_0.15_70/0.12)]"

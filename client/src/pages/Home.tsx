@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { Play, Info, Send, Star, Calendar, Loader2 } from "lucide-react";
+import { Play, Info, Send, Star, Calendar, Loader2, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import SiteLayout from "@/components/SiteLayout";
@@ -29,6 +29,7 @@ import {
   type TmdbSeries,
 } from "@/lib/tmdb";
 import { loadConfig } from "@/lib/config";
+import { useContinueWatching } from "@/hooks/useContinueWatching";
 
 export default function Home() {
   const [featured, setFeatured] = useState<RailItem | null>(null);
@@ -36,6 +37,7 @@ export default function Home() {
   const [series, setSeries] = useState<RailItem[]>([]);
   const [latest, setLatest] = useState<RailItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { entry: continueEntry } = useContinueWatching();
   const cfg = loadConfig();
 
   useEffect(() => {
@@ -155,6 +157,58 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </section>
+      )}
+
+      {continueEntry && (
+        <section className="container py-6 sm:py-8">
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <p className="text-[0.68rem] uppercase tracking-[0.24em] text-gold font-semibold">
+                Pick up where you left off
+              </p>
+              <h2 className="font-display font-bold text-2xl mt-1">Continue Watching</h2>
+            </div>
+            <Clock3 className="h-5 w-5 text-gold shrink-0" />
+          </div>
+
+          <Link
+            href={`/tv/${continueEntry.seriesId}?season=${continueEntry.seasonNumber}&episode=${continueEntry.episodeNumber}`}
+            className="group block max-w-2xl rounded-lg border border-primary/35 bg-card/70 p-3 sm:p-4 transition-colors hover:border-primary/70 hover:bg-card"
+          >
+            <div className="flex items-center gap-4">
+              <div className="relative h-24 w-16 sm:h-28 sm:w-[74px] shrink-0 overflow-hidden rounded-md border border-border bg-secondary">
+                {continueEntry.posterPath ? (
+                  <img
+                    src={posterUrl(continueEntry.posterPath, "w342") || ""}
+                    alt={continueEntry.seriesTitle}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-secondary" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <Play className="absolute bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 text-white fill-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                  S{continueEntry.seasonNumber} · E{String(continueEntry.episodeNumber).padStart(2, "0")}
+                </p>
+                <h3 className="font-display font-bold text-lg sm:text-xl truncate mt-1">
+                  {continueEntry.episodeName}
+                </h3>
+                <p className="text-sm text-muted-foreground truncate mt-1">
+                  {continueEntry.seriesTitle}
+                </p>
+                <div className="mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-secondary">
+                  <div className="h-full w-1/3 rounded-full bg-primary" />
+                </div>
+              </div>
+              <span className="hidden sm:inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-gold">
+                <Play className="h-4 w-4 fill-current" /> Resume
+              </span>
+            </div>
+          </Link>
         </section>
       )}
 
