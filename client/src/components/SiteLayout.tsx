@@ -25,12 +25,15 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
   const navItems = [
     { href: "/", label: "Home" },
-    { href: "/search", label: "Browse" },
-    { href: `/genre/28`, label: "Action" },
-    { href: `/genre/18`, label: "Drama" },
-    { href: `/genre/35`, label: "Comedy" },
-    { href: "/favorites", label: "Favorites" },
+    { href: "/search", label: "Movies" },
+    { href: "/search?type=tv", label: "Series" },
   ];
+
+  const isNavItemActive = (href: string) => {
+    if (href === "/") return location === "/";
+    if (href === "/search") return location === "/search";
+    return location.startsWith("/search?type=tv");
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -53,7 +56,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 key={item.href}
                 href={item.href}
                 className={`text-sm font-medium transition-colors duration-150 ${
-                  location === item.href
+                  isNavItemActive(item.href)
                     ? "text-gold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -67,7 +70,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <Link
               href="/favorites"
               aria-label={`Favorites${favorites.length ? ` (${favorites.length})` : ""}`}
-              className={`relative hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+              className={`relative inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
                 location === "/favorites"
                   ? "text-gold bg-accent"
                   : "text-muted-foreground hover:text-gold"
@@ -136,7 +139,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={`py-2.5 px-2 rounded-md text-sm font-medium ${
-                    location === item.href
+                    isNavItemActive(item.href)
                       ? "text-gold bg-accent"
                       : "text-foreground"
                   }`}

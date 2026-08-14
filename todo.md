@@ -14,3 +14,9 @@
 - [x] Refine Light mode hero overlay strength and gradient direction without weakening Dark mode.
 - [x] Refine movie and series poster hover scrims, CTA chips, and favorite controls for Light mode.
 - [x] Verify desktop and mobile screenshots and run checks.
+
+## Simplified Public Navigation
+
+- [x] Inspect the shared desktop/mobile menu and browse route handling.
+- [x] Replace genre links with Home, Movies, and Series only.
+- [x] Verify each navigation item at desktop and mobile widths.
