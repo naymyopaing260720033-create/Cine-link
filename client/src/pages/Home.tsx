@@ -294,6 +294,12 @@ export default function Home() {
       )}
 
       {/* ── Horizontal sections ──────────────────────────────── */}
+      <HorizontalRail
+        title="Recently Added"
+        viewAllHref="/search"
+        items={recentlyAdded}
+        loading={loading}
+      />
       <div className={continueEntry ? "-mt-2 sm:-mt-1" : "-mt-3 sm:-mt-2"}>
         <HorizontalRail
           title="Movies"
@@ -306,12 +312,6 @@ export default function Home() {
         title="Series"
         viewAllHref="/search?type=tv"
         items={series}
-        loading={loading}
-      />
-      <HorizontalRail
-        title="Recently Added Movies"
-        viewAllHref="/search"
-        items={recentlyAdded}
         loading={loading}
       />
       <HorizontalRail

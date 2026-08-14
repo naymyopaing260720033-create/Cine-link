@@ -99,3 +99,9 @@
 - [x] Inspect the responsive hero poster anchor and its mobile visibility rules.
 - [x] Remove the mini thumbnail from the initial Home hero presentation.
 - [x] Verify backdrop, text, CTA spacing, and desktop/mobile composition, then save a checkpoint.
+
+## Home Rail Order
+
+- [x] Inspect the current Home section markup and Recently Added ordering.
+- [x] Place Recently Added first, followed by Movies and Series.
+- [x] Verify rail spacing, loading states, and mobile/desktop order, then save a checkpoint.
