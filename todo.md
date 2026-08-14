@@ -44,3 +44,9 @@
 - [x] Inspect spacing when Continue Watching is present versus absent.
 - [x] Apply separate compact spacing for both Home states.
 - [x] Verify both states at mobile and desktop widths.
+
+## Home Hero CTA Refinement
+
+- [x] Inspect the Home hero CTA markup and current theme-aware button styles.
+- [x] Change the primary CTA to “Watch Here” with balanced sizing and strengthen the Details border.
+- [x] Verify the revised hero at mobile and desktop widths.

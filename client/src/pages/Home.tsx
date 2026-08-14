@@ -173,12 +173,17 @@ export default function Home() {
               </p>
 
               <div className="flex flex-wrap gap-3 pt-1">
-                <WatchButton movieId={f.id} movieTitle={f.title} size="lg" />
-                <a href={`/movie/${f.id}`}>
+                <WatchButton
+                  movieId={f.id}
+                  movieTitle={f.title}
+                  size="md"
+                  label="Watch Here"
+                />
+                <a href={`/movie/${f.id}`} className="inline-flex">
                   <Button
-                    size="lg"
+                    size="default"
                     variant="outline"
-                    className="marquee-chip border-border bg-background/70 text-foreground hover:bg-accent hover:text-foreground backdrop-blur-sm gap-2 active:scale-[0.97]"
+                    className="marquee-chip min-w-[6.5rem] justify-center border-foreground/35 bg-background/78 text-foreground shadow-sm backdrop-blur-sm gap-2 hover:border-primary/65 hover:bg-accent hover:text-foreground active:scale-[0.97]"
                   >
                     <Info className="h-4.5 w-4.5" />
                     Details
