@@ -100,21 +100,34 @@ export default function Home() {
           </div>
         </section>
       ) : (
-        <section className="relative overflow-hidden">
+        <section className="relative min-h-[500px] overflow-hidden md:min-h-[560px]">
           {f.backdrop_path && (
             <>
               <img
                 src={posterUrl(f.backdrop_path) || ""}
                 alt=""
-                className="absolute inset-0 h-full w-full object-cover"
+                className="hero-backdrop absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/20" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-background/60" />
+              <div className="hero-overlay absolute inset-0" />
             </>
           )}
 
+          {f.poster_path && (
+            <div className="pointer-events-none absolute inset-y-10 right-8 hidden w-[210px] md:block lg:right-20 lg:w-[270px]">
+              <div className="hero-poster-frame relative h-full w-full overflow-hidden rounded-md">
+                <img
+                  src={posterUrl(f.poster_path, "w780") || ""}
+                  alt=""
+                  className="hero-poster h-full w-full object-cover"
+                />
+                <div className="hero-poster-wash absolute inset-0" />
+                <div className="hero-poster-edge absolute inset-0" />
+              </div>
+            </div>
+          )}
+
           <div className="container relative py-10 sm:py-12 md:py-20">
-            <div className="max-w-xl space-y-3 sm:space-y-4">
+            <div className="relative z-10 max-w-xl space-y-3 sm:space-y-4 md:max-w-2xl">
               {/* meta row */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
                 <span className="px-2 py-0.5 text-xs font-bold rounded border border-primary/60 text-primary bg-primary/10">
@@ -134,11 +147,11 @@ export default function Home() {
                 <span className="text-muted-foreground">Featured Film</span>
               </div>
 
-              <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
+              <h1 className="hero-title font-display font-black text-3xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground">
                 {f.title}
               </h1>
 
-              <p className="text-muted-foreground leading-relaxed max-w-lg text-sm sm:text-base line-clamp-2 sm:line-clamp-3 drop-shadow-sm">
+              <p className="hero-description text-muted-foreground leading-relaxed max-w-lg text-sm sm:text-base line-clamp-2 sm:line-clamp-3">
                 {f.overview || "No overview available."}
               </p>
 

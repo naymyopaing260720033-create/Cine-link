@@ -64,6 +64,11 @@ Logotype "CineLink" in Fraunces 900 with the dot over the 'i' replaced by an amb
 ### Signature Brand Color
 Marquee Amber — oklch(0.78 0.15 70) — the glow that unmistakably owns the brand.
 
+## Style Decisions
+
+- The hero uses a right-side poster anchor with a restrained spotlight frame so the featured artwork, not only the backdrop, carries the opening-screen drama.
+- Hero overlays and poster hover controls are theme-aware: Light mode keeps artwork visible through a softer paper-toned wash while retaining dark image scrims for readable poster actions.
+
 ## Telegram Integration Plan (functional spec)
 - TMDB API (free public endpoints, API key configurable via env constant `VITE_TMDB_API_KEY`, fallback to demo via env-driven switch).
 - Each movie detail page exposes a "Watch on Telegram" CTA linking to `https://t.me/<bot_username>` (configured via `VITE_TELEGRAM_BOT` and optional deep-link `?start=movie_<id>`).
