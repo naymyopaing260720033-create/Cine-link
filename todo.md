@@ -146,3 +146,9 @@
 - [x] Add Vercel-safe SPA fallback and production environment configuration where needed.
 - [x] Verify production build and representative frontend routes before publishing.
 - [x] Save a Vercel-ready checkpoint and provide the user with the publishing steps.
+
+## Private GitHub Repository Publishing
+
+- [ ] Confirm access to `naymyopaing260720033-create/Cine-linl` and inspect its current contents.
+- [ ] Push the Vercel-ready CineLink source without exposing local secrets or build artifacts.
+- [ ] Verify the remote branch and repository files, then provide the Vercel import steps.
