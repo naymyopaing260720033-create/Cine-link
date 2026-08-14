@@ -47,11 +47,51 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-:root,
+:root {
+  /* Day screening — warm paper, ink, and the same amber marquee identity. */
+  --primary: oklch(0.72 0.16 70);
+  --primary-foreground: oklch(0.18 0.03 260);
+  --sidebar-primary: oklch(0.72 0.16 70);
+  --sidebar-primary-foreground: oklch(0.18 0.03 260);
+  --chart-1: oklch(0.72 0.16 70);
+  --chart-2: oklch(0.6 0.13 70);
+  --chart-3: oklch(0.48 0.1 70);
+  --chart-4: oklch(0.36 0.07 70);
+  --chart-5: oklch(0.28 0.05 260);
+  --radius: 0.5rem;
+  --background: oklch(0.97 0.012 80);
+  --foreground: oklch(0.22 0.03 260);
+  --card: oklch(0.995 0.006 80);
+  --card-foreground: oklch(0.22 0.03 260);
+  --popover: oklch(0.995 0.006 80);
+  --popover-foreground: oklch(0.22 0.03 260);
+  --secondary: oklch(0.93 0.018 80);
+  --secondary-foreground: oklch(0.3 0.03 260);
+  --muted: oklch(0.93 0.018 80);
+  --muted-foreground: oklch(0.48 0.025 260);
+  --accent: oklch(0.91 0.045 75);
+  --accent-foreground: oklch(0.25 0.04 260);
+  --destructive: oklch(0.58 0.2 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.25 0.03 260 / 14%);
+  --input: oklch(0.25 0.03 260 / 18%);
+  --ring: oklch(0.72 0.16 70);
+  --sidebar: oklch(0.95 0.014 80);
+  --sidebar-foreground: oklch(0.22 0.03 260);
+  --sidebar-accent: oklch(0.91 0.045 75);
+  --sidebar-accent-foreground: oklch(0.25 0.04 260);
+  --sidebar-border: oklch(0.25 0.03 260 / 14%);
+  --sidebar-ring: oklch(0.72 0.16 70);
+  --gold: oklch(0.62 0.14 70);
+  --gold-dim: oklch(0.5 0.1 75);
+  --skeleton-shimmer: oklch(0.84 0.03 75 / 70%);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
 .dark {
-  /* Midnight Marquee — dark cinematic base */
-  --primary: oklch(0.78 0.15 70);            /* Marquee Amber */
-  --primary-foreground: oklch(0.18 0.03 260); /* dark ink on amber */
+  /* Midnight Marquee — dark cinematic base. */
+  --primary: oklch(0.78 0.15 70);
+  --primary-foreground: oklch(0.18 0.03 260);
   --sidebar-primary: oklch(0.78 0.15 70);
   --sidebar-primary-foreground: oklch(0.18 0.03 260);
   --chart-1: oklch(0.78 0.15 70);
@@ -60,8 +100,8 @@
   --chart-4: oklch(0.38 0.08 70);
   --chart-5: oklch(0.28 0.05 260);
   --radius: 0.5rem;
-  --background: oklch(0.16 0.018 260);       /* charcoal-navy hall */
-  --foreground: oklch(0.93 0.012 80);        /* warm off-white */
+  --background: oklch(0.16 0.018 260);
+  --foreground: oklch(0.93 0.012 80);
   --card: oklch(0.2 0.02 262);
   --card-foreground: oklch(0.93 0.012 80);
   --popover: oklch(0.2 0.02 262);
@@ -83,10 +123,9 @@
   --sidebar-accent-foreground: oklch(0.93 0.05 80);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.78 0.15 70);
-
-  /* brand extras */
   --gold: oklch(0.78 0.15 70);
   --gold-dim: oklch(0.62 0.1 75);
+  --skeleton-shimmer: oklch(0.36 0.035 70 / 70%);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -100,6 +139,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: "Inter Tight", sans-serif;
+    transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out);
   }
   .font-display {
     font-family: "Fraunces", serif;
@@ -127,9 +167,9 @@
       background: linear-gradient(
         90deg,
         transparent 0%,
-        oklch(0.32 0.03 70 / 55%) 45%,
-        oklch(0.36 0.035 70 / 70%) 50%,
-        oklch(0.32 0.03 70 / 55%) 55%,
+        color-mix(in oklab, var(--skeleton-shimmer) 0%, transparent) 45%,
+        var(--skeleton-shimmer) 50%,
+        color-mix(in oklab, var(--skeleton-shimmer) 0%, transparent) 55%,
         transparent 100%
       );
       animation: skeletonSlide 1.6s var(--ease-out) infinite;

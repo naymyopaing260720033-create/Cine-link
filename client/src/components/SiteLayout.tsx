@@ -5,11 +5,12 @@
  */
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
-import { Search, Send, Menu, X, Heart } from "lucide-react";
+import { Search, Send, Menu, X, Heart, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { loadConfig } from "@/lib/config";
 import { toast } from "sonner";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const LOGO = "/manus-storage/cinelink-logo_12bdb54e.png";
 
@@ -18,6 +19,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   const [open, setOpen] = useState(false);
   const cfg = loadConfig();
   const { favorites } = useFavorites();
+  const { theme, toggleTheme } = useTheme();
+  const nextTheme = theme === "dark" ? "light" : "dark";
+  const themeLabel = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -86,6 +90,17 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 <Search className="h-4.5 w-4.5" />
               </Button>
             </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={themeLabel}
+              aria-pressed={theme === "light"}
+              title={themeLabel}
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-gold"
+            >
+              {theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
+            </Button>
             <a
               href={`https://t.me/${cfg.telegramBotUsername}`}
               target="_blank"
@@ -129,6 +144,15 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                   {item.label}
                 </Link>
               ))}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                aria-pressed={theme === "light"}
+                className="flex items-center gap-2 rounded-md px-2 py-2.5 text-left text-sm font-medium text-foreground hover:bg-accent"
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4 text-gold" /> : <Moon className="h-4 w-4 text-gold" />}
+                Use {nextTheme} mode
+              </button>
               <a
                 href={`https://t.me/${cfg.telegramBotUsername}`}
                 target="_blank"

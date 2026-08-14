@@ -200,12 +200,12 @@ function RailCard({ item, index = 0 }: { item: RailItem; index?: number }) {
               <Play className="h-8 w-8" />
             </div>
           )}
-          <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded bg-black/75 text-gold border border-gold/40 backdrop-blur-sm">
+            <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded bg-black/75 text-gold border border-gold/40 backdrop-blur-sm">
             {badge}
           </span>
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
           <div className="absolute bottom-2 left-2 right-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200">
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground bg-black/60 backdrop-blur-sm rounded px-2 py-1">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-black/60 backdrop-blur-sm rounded px-2 py-1">
               <Play className="h-3 w-3 text-gold" />
               Watch via Telegram
             </span>
