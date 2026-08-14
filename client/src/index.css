@@ -98,7 +98,7 @@
   --poster-badge-bg: oklch(0.12 0.02 260 / 0.8);
   --poster-favorite-bg: oklch(0.995 0.006 80 / 0.92);
   --hero-poster-opacity: 0.98;
-  --hero-poster-wash: linear-gradient(90deg, oklch(0.97 0.012 80 / 0.32), transparent 30%, oklch(0.97 0.012 80 / 0.02));
+  --hero-poster-wash: linear-gradient(90deg, transparent 0%, transparent 100%);
   --hero-poster-edge: oklch(0.72 0.16 70 / 0.35);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -154,7 +154,7 @@
   --poster-badge-bg: oklch(0.02 0.01 260 / 0.82);
   --poster-favorite-bg: oklch(0.16 0.018 260 / 0.86);
   --hero-poster-opacity: 1;
-  --hero-poster-wash: linear-gradient(90deg, oklch(0.16 0.018 260 / 0.28), transparent 30%, oklch(0.16 0.018 260 / 0.03));
+  --hero-poster-wash: linear-gradient(90deg, transparent 0%, transparent 100%);
   --hero-poster-edge: oklch(0.78 0.15 70 / 0.28);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -223,7 +223,7 @@
   }
   .hero-poster {
     opacity: var(--hero-poster-opacity);
-    filter: saturate(1.08) contrast(1.12) brightness(1.12);
+    filter: saturate(1.16) contrast(1.16) brightness(1.14);
     backface-visibility: hidden;
     will-change: opacity;
   }
@@ -231,7 +231,7 @@
     background: var(--hero-poster-wash);
   }
   .hero-poster-edge {
-    box-shadow: inset 0 0 0 1px var(--hero-poster-edge), inset 0 0 42px oklch(0.05 0.01 260 / 0.16);
+    box-shadow: inset 0 0 0 1px var(--hero-poster-edge), inset 0 0 24px oklch(0.05 0.01 260 / 0.08);
   }
   @media (max-width: 767px) {
     .hero-backdrop {
@@ -240,7 +240,7 @@
     }
     .hero-overlay {
       background:
-        linear-gradient(0deg, color-mix(in oklab, var(--background) 95%, transparent) 0%, color-mix(in oklab, var(--background) 60%, transparent) 38%, color-mix(in oklab, var(--background) 10%, transparent) 100%);
+        linear-gradient(0deg, color-mix(in oklab, var(--background) 84%, transparent) 0%, color-mix(in oklab, var(--background) 38%, transparent) 38%, transparent 100%);
     }
   }
   .poster-hover-scrim {

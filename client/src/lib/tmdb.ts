@@ -9,14 +9,14 @@ import { toast } from "sonner";
 
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
-export function posterUrl(path: string | null, size: "w342" | "w780" | "w1280" = "w342") {
+export function posterUrl(path: string | null, size: "w342" | "w780" | "w1280" | "original" = "w342") {
   if (!path) return "";
   return `${IMG_BASE}/${size}${path}`;
 }
 
-export function backdropUrl(path: string | null) {
+export function backdropUrl(path: string | null, size: "w780" | "w1280" | "original" = "w1280") {
   if (!path) return "";
-  return `${IMG_BASE}/original${path}`;
+  return `${IMG_BASE}/${size}${path}`;
 }
 
 export function profileUrl(path: string | null) {

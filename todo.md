@@ -87,3 +87,9 @@
 - [x] Improve poster sharpness without reducing the artwork's visual detail.
 - [x] Stabilize title, description, and CTA positions across short and long featured titles.
 - [x] Verify multiple rotating hero states at mobile and desktop widths, then save a checkpoint.
+
+## Reference-Style Crisp Hero Poster
+
+- [x] Inspect the current poster wash and compare the intended treatment with the supplied reference.
+- [x] Reduce poster dimming and apply a crisp, high-detail hero poster treatment.
+- [x] Verify poster clarity and text contrast at mobile and desktop widths, then save a checkpoint.

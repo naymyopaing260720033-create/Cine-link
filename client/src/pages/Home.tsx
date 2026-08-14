@@ -23,6 +23,7 @@ import {
   getPopularSeries,
   getRecentlyAddedMovies,
   posterUrl,
+  backdropUrl,
   movieYear,
   seriesYear,
   fetchWithError,
@@ -140,7 +141,7 @@ export default function Home() {
             <>
               <img
                 key={`hero-backdrop-${f.id}`}
-                src={posterUrl(f.backdrop_path) || ""}
+                  src={backdropUrl(f.backdrop_path, "w1280") || ""}
                 alt=""
                 className="hero-backdrop hero-backdrop-crossfade absolute inset-0 h-full w-full object-cover"
               />
