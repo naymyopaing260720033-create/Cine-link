@@ -118,3 +118,31 @@
 - [x] Inspect the current NEW badge classes and shared motion/reduced-motion rules.
 - [x] Add a restrained shimmer and hover glow effect to the NEW badge.
 - [x] Verify visibility and card layout at mobile and desktop widths, then save a checkpoint.
+
+## Telegram Channel Backend Architecture
+
+- [x] Compare channel-event synchronization options for private Movies and Series channels.
+- [x] Define the bot deep-link flow for movies and season/episode delivery.
+- [x] Choose the persistent catalog, publish-state, and user-viewed-state data model.
+- [ ] Confirm hosting, Telegram permissions, secrets, and deployment requirements before implementation.
+
+## Supabase and MongoDB Backend Split
+
+- [x] Document Supabase responsibilities for webhook/API/auth/operational state.
+- [x] Document MongoDB responsibilities for movies, series, episodes, and Telegram source messages.
+- [x] Define the Python bot deployment boundary because Supabase Edge Functions do not run a persistent Python worker.
+- [ ] Confirm environment variables, channel permissions, and caption-parser contract before implementation.
+
+## Vercel Telegram Webhook Hosting
+
+- [x] Compare Vercel request-based webhook hosting with Supabase Edge Functions and persistent workers.
+- [x] Define the Vercel API route boundary for channel ingestion and `/start` deep-link delivery.
+- [x] Confirm runtime limits, retry/idempotency handling, and server-side secret requirements.
+- [ ] Decide whether the TypeScript bot will live alongside the CineLink website on Vercel.
+
+## Frontend Vercel Hosting Preparation
+
+- [x] Audit the Vite build, SPA routes, and current deployment configuration.
+- [x] Add Vercel-safe SPA fallback and production environment configuration where needed.
+- [x] Verify production build and representative frontend routes before publishing.
+- [ ] Save a Vercel-ready checkpoint and provide the user with the publishing steps.
