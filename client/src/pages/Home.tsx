@@ -102,8 +102,8 @@ export default function Home() {
     <SiteLayout>
       {/* ── Featured hero ────────────────────────────────────── */}
       {loading || !f ? (
-        <section className="container relative overflow-hidden py-10">
-          <div className="relative h-[420px] md:h-[520px] w-full rounded-lg bg-secondary">
+        <section className="container relative overflow-hidden py-8 sm:py-10 md:py-10">
+          <div className="relative h-[360px] sm:h-[420px] md:h-[520px] w-full rounded-lg bg-secondary">
             <MarqueeSkeleton className="absolute inset-0 rounded-lg" />
             <div className="absolute bottom-8 left-6 space-y-3 max-w-md">
               <MarqueeSkeleton className="h-4 w-2/3" />
@@ -117,7 +117,7 @@ export default function Home() {
           </div>
         </section>
       ) : (
-        <section className="relative min-h-[500px] overflow-hidden md:min-h-[560px]">
+        <section className="relative min-h-[390px] overflow-hidden sm:min-h-[450px] md:min-h-[560px]">
           {f.backdrop_path && (
             <>
               <img
@@ -143,7 +143,7 @@ export default function Home() {
             </div>
           )}
 
-          <div className="container relative py-10 sm:py-12 md:py-20">
+          <div className="container relative py-8 sm:py-10 md:py-20">
             <div className="relative z-10 max-w-xl space-y-3 sm:space-y-4 md:max-w-2xl">
               {/* meta row */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">

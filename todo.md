@@ -32,3 +32,9 @@
 - [x] Inspect movie and series detail layouts, TMDB types, and reusable rail components.
 - [x] Add TMDB similar-content endpoints and responsive rails below both detail pages.
 - [x] Verify populated, loading, empty, and responsive states.
+
+## Home Mobile Hero Spacing
+
+- [x] Inspect the mobile hero height and the gap before the Movies section.
+- [x] Tighten the mobile-only hero spacing without changing the desktop composition.
+- [x] Verify the revised layout at mobile and desktop widths.
