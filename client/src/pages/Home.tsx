@@ -153,7 +153,7 @@ export default function Home() {
               <div className="hero-poster-frame relative h-full w-full overflow-hidden rounded-md">
                 <img
                   key={`hero-poster-${f.id}`}
-                  src={posterUrl(f.poster_path, "w780") || ""}
+                  src={posterUrl(f.poster_path, "w1280") || ""}
                   alt=""
                   className="hero-poster hero-poster-crossfade h-full w-full object-cover"
                 />
@@ -184,15 +184,17 @@ export default function Home() {
                 <span className="text-muted-foreground">Featured Film</span>
               </div>
 
-              <h1 className="hero-title font-display font-black text-3xl sm:text-5xl md:text-6xl leading-[1.05] text-foreground">
-                {f.title}
-              </h1>
+              <div className="flex h-[4.25rem] items-end overflow-hidden sm:h-[6.5rem] md:h-[8rem]">
+                <h1 className="hero-title line-clamp-2 font-display font-black text-3xl leading-[1.05] text-foreground sm:text-5xl md:text-6xl">
+                  {f.title}
+                </h1>
+              </div>
 
-              <p className="hero-description text-muted-foreground leading-relaxed max-w-lg text-sm sm:text-base line-clamp-2 sm:line-clamp-3">
+              <p className="hero-description h-[2.75rem] max-w-lg overflow-hidden text-sm leading-relaxed text-muted-foreground line-clamp-2 sm:h-[4.5rem] sm:text-base sm:line-clamp-3">
                 {f.overview || "No overview available."}
               </p>
 
-              <div className="flex flex-wrap gap-3 pt-1">
+              <div className="flex h-10 flex-nowrap items-center gap-2 pt-1 sm:gap-3">
                 <WatchButton
                   movieId={f.id}
                   movieTitle={f.title}

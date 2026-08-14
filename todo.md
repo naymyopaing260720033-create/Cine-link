@@ -80,3 +80,10 @@
 - [x] Inspect the rotating backdrop and poster render layers.
 - [x] Add a 250ms cross-fade for featured artwork changes with reduced-motion support.
 - [x] Verify the transition and responsive hero layout, then save a checkpoint.
+
+## Hero Poster Clarity and Content Stability
+
+- [x] Inspect the hero poster asset sizing, filtering, and cross-fade opacity.
+- [x] Improve poster sharpness without reducing the artwork's visual detail.
+- [x] Stabilize title, description, and CTA positions across short and long featured titles.
+- [x] Verify multiple rotating hero states at mobile and desktop widths, then save a checkpoint.

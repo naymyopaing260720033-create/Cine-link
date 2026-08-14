@@ -223,13 +223,15 @@
   }
   .hero-poster {
     opacity: var(--hero-poster-opacity);
-    filter: saturate(1.02) contrast(1.06) brightness(1.08);
+    filter: saturate(1.08) contrast(1.12) brightness(1.12);
+    backface-visibility: hidden;
+    will-change: opacity;
   }
   .hero-poster-wash {
     background: var(--hero-poster-wash);
   }
   .hero-poster-edge {
-    box-shadow: inset 0 0 0 1px var(--hero-poster-edge), inset 0 0 70px oklch(0.05 0.01 260 / 0.28);
+    box-shadow: inset 0 0 0 1px var(--hero-poster-edge), inset 0 0 42px oklch(0.05 0.01 260 / 0.16);
   }
   @media (max-width: 767px) {
     .hero-backdrop {
