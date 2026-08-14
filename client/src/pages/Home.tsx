@@ -33,7 +33,8 @@ import { loadConfig } from "@/lib/config";
 import { useContinueWatching } from "@/hooks/useContinueWatching";
 
 export default function Home() {
-  const [featured, setFeatured] = useState<RailItem | null>(null);
+  const [featuredPool, setFeaturedPool] = useState<RailItem[]>([]);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
   const [movies, setMovies] = useState<RailItem[]>([]);
   const [series, setSeries] = useState<RailItem[]>([]);
   const [recentlyAdded, setRecentlyAdded] = useState<RailItem[]>([]);
@@ -41,6 +42,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const { entry: continueEntry } = useContinueWatching();
   const cfg = loadConfig();
+  const featured = featuredPool[featuredIndex] ?? null;
 
   useEffect(() => {
     let cancelled = false;
@@ -55,7 +57,19 @@ export default function Home() {
       .then(([trend, pop, trendSeries, popSeries, recentMovies]) => {
         if (cancelled) return;
         const t = trend.results as TmdbMovie[];
-        setFeatured(t[0] ? { kind: "movie", data: t[0] } : null);
+        const recent = recentMovies.results as TmdbMovie[];
+        const heroPool = [...t, ...recent]
+          .filter((movie) => movie.backdrop_path && movie.poster_path)
+          .filter(
+            (movie, index, all) =>
+              all.findIndex((candidate) => candidate.id === movie.id) === index,
+          )
+          .slice(0, 6)
+          .map((movie) => toRailItem(movie));
+        setFeaturedPool(heroPool);
+        setFeaturedIndex(
+          heroPool.length > 1 ? Math.floor(Math.random() * heroPool.length) : 0,
+        );
         setMovies(
           t.slice(1, 21).map((m) => toRailItem(m)),
         );
@@ -65,7 +79,7 @@ export default function Home() {
             .map((s) => toRailSeries(s)),
         );
         setRecentlyAdded(
-          (recentMovies.results as TmdbMovie[])
+          recent
             .filter((movie) => movie.release_date && movie.poster_path)
             .sort((a, b) => b.release_date.localeCompare(a.release_date))
             .slice(0, 20)
@@ -85,8 +99,19 @@ export default function Home() {
       });
     return () => {
       cancelled = true;
-    };
+      };
   }, []);
+
+  useEffect(() => {
+    if (featuredPool.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const rotation = window.setInterval(() => {
+      setFeaturedIndex((current) => (current + 1) % featuredPool.length);
+    }, 9000);
+
+    return () => window.clearInterval(rotation);
+  }, [featuredPool.length]);
 
   const f = featured?.data as TmdbMovie | undefined;
   const fYear = movieYear(f);
@@ -183,6 +208,29 @@ export default function Home() {
                   </Button>
                 </a>
               </div>
+
+              {featuredPool.length > 1 && (
+                <div className="flex items-center gap-1.5 pt-1" aria-label="Featured films">
+                  {featuredPool.map((item, index) => (
+                    <button
+                      key={`${item.kind}-${item.data.id}`}
+                      type="button"
+                      aria-label={`Show featured film ${index + 1}`}
+                      aria-pressed={featuredIndex === index}
+                      onClick={() => setFeaturedIndex(index)}
+                      className="group flex h-6 items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    >
+                      <span
+                        className={
+                          featuredIndex === index
+                            ? "h-1.5 w-7 rounded-full bg-primary transition-all duration-200"
+                            : "h-1.5 w-1.5 rounded-full bg-foreground/45 transition-all duration-200 group-hover:bg-foreground/75"
+                        }
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>

@@ -56,3 +56,9 @@
 - [x] Inspect the current Recently Added data flow and rail composition.
 - [x] Show movies only and order them newest-first by TMDB release date.
 - [x] Verify ordering, loading/empty states, and responsive behavior.
+
+## Dynamic Home Hero Feature
+
+- [x] Inspect the current Home hero featured selection and TMDB data flow.
+- [x] Replace the fixed Spider-Man hero with dynamic TMDB-powered featured content.
+- [x] Verify the hero poster/backdrop at mobile and desktop widths, then save a checkpoint.
