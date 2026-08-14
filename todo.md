@@ -93,3 +93,9 @@
 - [x] Inspect the current poster wash and compare the intended treatment with the supplied reference.
 - [x] Reduce poster dimming and apply a crisp, high-detail hero poster treatment.
 - [x] Verify poster clarity and text contrast at mobile and desktop widths, then save a checkpoint.
+
+## Remove Initial Hero Mini Thumbnail
+
+- [x] Inspect the responsive hero poster anchor and its mobile visibility rules.
+- [x] Remove the mini thumbnail from the initial Home hero presentation.
+- [x] Verify backdrop, text, CTA spacing, and desktop/mobile composition, then save a checkpoint.
