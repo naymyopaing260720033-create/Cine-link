@@ -139,9 +139,10 @@ export default function Home() {
           {f.backdrop_path && (
             <>
               <img
+                key={`hero-backdrop-${f.id}`}
                 src={posterUrl(f.backdrop_path) || ""}
                 alt=""
-                className="hero-backdrop absolute inset-0 h-full w-full object-cover"
+                className="hero-backdrop hero-backdrop-crossfade absolute inset-0 h-full w-full object-cover"
               />
               <div className="hero-overlay absolute inset-0" />
             </>
@@ -151,9 +152,10 @@ export default function Home() {
             <div className="pointer-events-none absolute right-4 top-5 bottom-auto z-10 block h-28 w-[76px] sm:right-6 sm:top-8 sm:h-36 sm:w-24 md:bottom-10 md:top-10 md:h-auto md:right-8 md:w-[210px] lg:right-20 lg:w-[270px]">
               <div className="hero-poster-frame relative h-full w-full overflow-hidden rounded-md">
                 <img
+                  key={`hero-poster-${f.id}`}
                   src={posterUrl(f.poster_path, "w780") || ""}
                   alt=""
-                  className="hero-poster h-full w-full object-cover"
+                  className="hero-poster hero-poster-crossfade h-full w-full object-cover"
                 />
                 <div className="hero-poster-wash absolute inset-0" />
                 <div className="hero-poster-edge absolute inset-0" />

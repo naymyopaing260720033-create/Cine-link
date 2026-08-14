@@ -74,3 +74,9 @@
 - [x] Inspect the current responsive poster anchor and mobile hero backdrop composition.
 - [x] Convert the mobile poster into a compact thumbnail without changing desktop behavior.
 - [x] Verify mobile artwork visibility and desktop regression, then save a checkpoint.
+
+## Home Hero Cross-Fade
+
+- [x] Inspect the rotating backdrop and poster render layers.
+- [x] Add a 250ms cross-fade for featured artwork changes with reduced-motion support.
+- [x] Verify the transition and responsive hero layout, then save a checkpoint.

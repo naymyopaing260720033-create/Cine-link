@@ -181,6 +181,30 @@
     opacity: var(--hero-backdrop-opacity);
     filter: var(--hero-backdrop-filter);
   }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-backdrop-crossfade {
+      animation: heroBackdropCrossFade 250ms var(--ease-out) both;
+    }
+    .hero-poster-crossfade {
+      animation: heroPosterCrossFade 250ms var(--ease-out) both;
+    }
+    @keyframes heroBackdropCrossFade {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: var(--hero-backdrop-opacity);
+      }
+    }
+    @keyframes heroPosterCrossFade {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: var(--hero-poster-opacity);
+      }
+    }
+  }
   .hero-overlay {
     background:
       linear-gradient(90deg, var(--hero-overlay-start) 0%, var(--hero-overlay-mid) 48%, var(--hero-overlay-end) 100%),
