@@ -17,7 +17,7 @@ import {
 import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import SiteLayout from "@/components/SiteLayout";
 import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
-import WatchButton, { WatchInstructions } from "@/components/WatchButton";
+import WatchButton from "@/components/WatchButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromMovie } from "@/hooks/useFavorites";
 import {
@@ -168,7 +168,6 @@ export default function MovieDetail() {
                   className="h-9 w-9 shrink-0 p-0"
                 />
               </div>
-              <WatchInstructions movieId={movie.id} />
             </div>
           </div>
 
