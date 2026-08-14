@@ -11,13 +11,12 @@ import {
   Calendar,
   Play,
   ArrowLeft,
-  Youtube,
-  X,
   Loader2,
 } from "lucide-react";
 import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import SiteLayout from "@/components/SiteLayout";
 import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
+import TrailerPanel from "@/components/TrailerPanel";
 import WatchButton from "@/components/WatchButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromMovie } from "@/hooks/useFavorites";
@@ -37,12 +36,10 @@ export default function MovieDetail() {
   const [movie, setMovie] = useState<TmdbMovieDetail | null>(null);
   const [more, setMore] = useState<TmdbMovie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showTrailer, setShowTrailer] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    setShowTrailer(false);
     Promise.all([
       fetchWithError(() => getMovie(movieId)),
       fetchWithError(getTrending),
@@ -220,35 +217,7 @@ export default function MovieDetail() {
             </p>
 
             {/* trailer */}
-            {trailer && (
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  aria-expanded={showTrailer}
-                  onClick={() => setShowTrailer((current) => !current)}
-                  className="inline-flex items-center gap-2 text-sm font-medium text-gold hover:text-foreground transition-colors"
-                >
-                  {showTrailer ? (
-                    <X className="h-4 w-4" />
-                  ) : (
-                    <Youtube className="h-4 w-4" />
-                  )}
-                  {showTrailer ? "Close trailer" : "Watch trailer on this page"}
-                </button>
-
-                {showTrailer && (
-                  <div className="relative overflow-hidden rounded-xl border border-border bg-black shadow-2xl aspect-video max-w-3xl">
-                    <iframe
-                      className="absolute inset-0 h-full w-full"
-                      src={`https://www.youtube-nocookie.com/embed/${trailer.key}?autoplay=1&rel=0`}
-                      title={`${movie.title} trailer`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
-              </div>
-            )}
+            <TrailerPanel title={movie.title} trailerKey={trailer?.key} />
 
             {/* cast */}
             {cast.length > 0 && (
