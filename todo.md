@@ -112,3 +112,9 @@
 - [x] Show a NEW badge for newly listed Recently Added movies.
 - [x] Persist viewed movie IDs locally and hide each badge after its detail page is opened.
 - [x] Verify first-visit and returning-visit behavior across responsive cards, then save a checkpoint.
+
+## NEW Badge Attention Animation
+
+- [x] Inspect the current NEW badge classes and shared motion/reduced-motion rules.
+- [x] Add a restrained shimmer and hover glow effect to the NEW badge.
+- [x] Verify visibility and card layout at mobile and desktop widths, then save a checkpoint.

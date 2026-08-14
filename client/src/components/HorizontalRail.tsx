@@ -219,7 +219,7 @@ function RailCard({
             {badge}
           </span>
           {isNew && (
-            <span className="absolute right-2 top-10 rounded border border-primary/70 bg-primary px-1.5 py-0.5 text-[9px] font-black tracking-[0.12em] text-primary-foreground shadow-[0_0_14px_oklch(0.78_0.15_70/0.28)]">
+            <span className="new-badge absolute right-2 top-10 rounded border border-primary/70 bg-primary px-1.5 py-0.5 text-[9px] font-black tracking-[0.12em] text-primary-foreground">
               NEW
             </span>
           )}

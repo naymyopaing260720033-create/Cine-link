@@ -253,6 +253,51 @@
   .poster-quality-badge {
     background: var(--poster-badge-bg);
   }
+  .new-badge {
+    isolation: isolate;
+    overflow: hidden;
+    box-shadow: 0 0 14px oklch(0.78 0.15 70 / 0.28);
+  }
+  .new-badge::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    transform: translateX(-125%);
+    background: linear-gradient(
+      110deg,
+      transparent 24%,
+      oklch(1 0 0 / 0.06) 42%,
+      oklch(1 0 0 / 0.62) 50%,
+      oklch(1 0 0 / 0.06) 58%,
+      transparent 76%
+    );
+  }
+  .group:hover .new-badge {
+    background: color-mix(in oklab, var(--primary) 88%, white);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .new-badge {
+      transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out), background-color 180ms var(--ease-out);
+    }
+    .new-badge::after {
+      animation: newBadgeShimmer 2.8s var(--ease-in-out) infinite;
+    }
+    .group:hover .new-badge {
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 0 20px oklch(0.8 0.17 70 / 0.48);
+    }
+    @keyframes newBadgeShimmer {
+      0%,
+      62%,
+      100% {
+        transform: translateX(-125%);
+      }
+      82% {
+        transform: translateX(125%);
+      }
+    }
+  }
   .poster-favorite {
     background: var(--poster-favorite-bg);
     border: 1px solid var(--border);
