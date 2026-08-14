@@ -53,11 +53,13 @@ export default function HorizontalRail({
   viewAllHref,
   items,
   loading = false,
+  newMovieIds = [],
 }: {
   title: string;
   viewAllHref?: string;
   items: RailItem[];
   loading?: boolean;
+  newMovieIds?: number[];
 }) {
   const scroller = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
@@ -147,7 +149,12 @@ export default function HorizontalRail({
                   </div>
                 ))
               : items.map((item, i) => (
-                  <RailCard key={`${item.kind}-${item.data.id}`} item={item} index={i} />
+                  <RailCard
+                    key={`${item.kind}-${item.data.id}`}
+                    item={item}
+                    index={i}
+                    isNew={item.kind === "movie" && newMovieIds.includes(item.data.id)}
+                  />
                 ))}
           </div>
         </div>
@@ -156,7 +163,15 @@ export default function HorizontalRail({
   );
 }
 
-function RailCard({ item, index = 0 }: { item: RailItem; index?: number }) {
+function RailCard({
+  item,
+  index = 0,
+  isNew = false,
+}: {
+  item: RailItem;
+  index?: number;
+  isNew?: boolean;
+}) {
   const [genres, setGenres] = useState<string[]>([]);
   const title = itemTitle(item);
   const year = itemYear(item);
@@ -203,6 +218,11 @@ function RailCard({ item, index = 0 }: { item: RailItem; index?: number }) {
           <span className="poster-quality-badge absolute top-2 left-2 px-2 py-0.5 text-[10px] font-bold rounded text-gold border border-gold/40 backdrop-blur-sm">
             {badge}
           </span>
+          {isNew && (
+            <span className="absolute right-2 top-10 rounded border border-primary/70 bg-primary px-1.5 py-0.5 text-[9px] font-black tracking-[0.12em] text-primary-foreground shadow-[0_0_14px_oklch(0.78_0.15_70/0.28)]">
+              NEW
+            </span>
+          )}
           <div className="poster-hover-scrim absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
           <div className="absolute bottom-2 left-2 right-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-200">
             <span className="poster-hover-cta inline-flex items-center gap-1 text-xs font-semibold text-white backdrop-blur-sm rounded px-2 py-1">

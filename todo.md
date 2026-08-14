@@ -105,3 +105,10 @@
 - [x] Inspect the current Home section markup and Recently Added ordering.
 - [x] Place Recently Added first, followed by Movies and Series.
 - [x] Verify rail spacing, loading states, and mobile/desktop order, then save a checkpoint.
+
+## Recently Added NEW Badge
+
+- [x] Inspect the reusable movie card, Recently Added rail, and movie detail route.
+- [x] Show a NEW badge for newly listed Recently Added movies.
+- [x] Persist viewed movie IDs locally and hide each badge after its detail page is opened.
+- [x] Verify first-visit and returning-visit behavior across responsive cards, then save a checkpoint.

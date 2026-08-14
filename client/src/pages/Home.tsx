@@ -32,6 +32,7 @@ import {
 } from "@/lib/tmdb";
 import { loadConfig } from "@/lib/config";
 import { useContinueWatching } from "@/hooks/useContinueWatching";
+import { useViewedMovies } from "@/hooks/useViewedMovies";
 
 export default function Home() {
   const [featuredPool, setFeaturedPool] = useState<RailItem[]>([]);
@@ -42,6 +43,7 @@ export default function Home() {
   const [latest, setLatest] = useState<RailItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { entry: continueEntry } = useContinueWatching();
+  const { viewedMovieIds } = useViewedMovies();
   const cfg = loadConfig();
   const featured = featuredPool[featuredIndex] ?? null;
 
@@ -299,6 +301,9 @@ export default function Home() {
         viewAllHref="/search"
         items={recentlyAdded}
         loading={loading}
+        newMovieIds={recentlyAdded
+          .filter((item) => item.kind === "movie" && !viewedMovieIds.includes(item.data.id))
+          .map((item) => item.data.id)}
       />
       <div className={continueEntry ? "-mt-2 sm:-mt-1" : "-mt-3 sm:-mt-2"}>
         <HorizontalRail

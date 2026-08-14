@@ -20,6 +20,7 @@ import TrailerPanel from "@/components/TrailerPanel";
 import WatchButton from "@/components/WatchButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromMovie } from "@/hooks/useFavorites";
+import { useViewedMovies } from "@/hooks/useViewedMovies";
 import HorizontalRail, { toRailItem, type RailItem } from "@/components/HorizontalRail";
 import {
   getMovie,
@@ -37,6 +38,7 @@ export default function MovieDetail() {
   const [similar, setSimilar] = useState<RailItem[]>([]);
   const [similarLoading, setSimilarLoading] = useState(true);
   const [loading, setLoading] = useState(true);
+  const { markMovieViewed } = useViewedMovies();
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +70,12 @@ export default function MovieDetail() {
       cancelled = true;
     };
   }, [movieId]);
+
+  useEffect(() => {
+    if (movie && Number.isInteger(movieId)) {
+      markMovieViewed(movieId);
+    }
+  }, [movie, movieId, markMovieViewed]);
 
   if (loading) {
     return (
