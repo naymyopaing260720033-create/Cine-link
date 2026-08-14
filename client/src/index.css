@@ -207,6 +207,16 @@
   .hero-poster-edge {
     box-shadow: inset 0 0 0 1px var(--hero-poster-edge), inset 0 0 70px oklch(0.05 0.01 260 / 0.28);
   }
+  @media (max-width: 767px) {
+    .hero-backdrop {
+      opacity: calc(var(--hero-backdrop-opacity) + 0.12);
+      filter: saturate(1.12) contrast(1.04) brightness(1.06);
+    }
+    .hero-overlay {
+      background:
+        linear-gradient(0deg, color-mix(in oklab, var(--background) 95%, transparent) 0%, color-mix(in oklab, var(--background) 60%, transparent) 38%, color-mix(in oklab, var(--background) 10%, transparent) 100%);
+    }
+  }
   .poster-hover-scrim {
     background: linear-gradient(0deg, var(--poster-scrim) 0%, transparent 74%);
   }

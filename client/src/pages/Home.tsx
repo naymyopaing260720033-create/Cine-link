@@ -148,7 +148,7 @@ export default function Home() {
           )}
 
           {f.poster_path && (
-            <div className="pointer-events-none absolute inset-y-10 right-8 hidden w-[210px] md:block lg:right-20 lg:w-[270px]">
+            <div className="pointer-events-none absolute right-4 top-5 bottom-auto z-10 block h-28 w-[76px] sm:right-6 sm:top-8 sm:h-36 sm:w-24 md:bottom-10 md:top-10 md:h-auto md:right-8 md:w-[210px] lg:right-20 lg:w-[270px]">
               <div className="hero-poster-frame relative h-full w-full overflow-hidden rounded-md">
                 <img
                   src={posterUrl(f.poster_path, "w780") || ""}
@@ -162,7 +162,7 @@ export default function Home() {
           )}
 
           <div className="container relative py-8 sm:py-10 md:py-20">
-            <div className="relative z-10 max-w-xl space-y-3 sm:space-y-4 md:max-w-2xl">
+            <div className="relative z-10 max-w-[78%] space-y-3 sm:space-y-4 md:max-w-2xl">
               {/* meta row */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
                 <span className="px-2 py-0.5 text-xs font-bold rounded border border-primary/60 text-primary bg-primary/10">

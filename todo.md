@@ -68,3 +68,9 @@
 - [x] Inspect the poster wash, edge, and image contrast layers in the hero.
 - [x] Increase featured poster brightness while preserving readable hero copy.
 - [x] Verify dark/light mode behavior at desktop and mobile widths, then save a checkpoint.
+
+## Compact Mobile Hero Poster
+
+- [x] Inspect the current responsive poster anchor and mobile hero backdrop composition.
+- [x] Convert the mobile poster into a compact thumbnail without changing desktop behavior.
+- [x] Verify mobile artwork visibility and desktop regression, then save a checkpoint.
