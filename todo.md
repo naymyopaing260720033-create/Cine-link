@@ -149,6 +149,12 @@
 
 ## Private GitHub Repository Publishing
 
-- [ ] Confirm access to `naymyopaing260720033-create/Cine-linl` and inspect its current contents.
-- [ ] Push the Vercel-ready CineLink source without exposing local secrets or build artifacts.
-- [ ] Verify the remote branch and repository files, then provide the Vercel import steps.
+- [x] Confirm access to `naymyopaing260720033-create/Cine-link` and inspect its current contents.
+- [x] Push the Vercel-ready CineLink source without exposing local secrets or build artifacts.
+- [x] Verify the remote branch and repository files, then provide the Vercel import steps.
+
+### GitHub Push Retry
+
+- [x] Re-check the corrected `naymyopaing260720033-create/Cine-link` repository and its current branch state.
+- [x] Retry pushing the prepared local CineLink commit with the refreshed GitHub authorization.
+- [x] Verify the remote commit and confirm that `package.json`, `vercel.json`, and `client/` are present.
