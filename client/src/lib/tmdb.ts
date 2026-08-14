@@ -211,6 +211,12 @@ export async function getMovie(id: number): Promise<TmdbMovieDetail> {
   return tmdbFetch<TmdbMovieDetail>(`/movie/${id}?append_to_response=videos,credits`);
 }
 
+export async function getSimilarMovies(
+  id: number,
+): Promise<TmdbListResult<TmdbMovie>> {
+  return tmdbFetch(`/movie/${id}/similar?page=1`);
+}
+
 export async function searchMovies(
   query: string,
   page = 1,
@@ -257,6 +263,12 @@ export async function getTopRatedSeries(): Promise<TmdbListResult<TmdbSeries>> {
 
 export async function getSeries(id: number): Promise<TmdbSeriesDetail> {
   return tmdbFetch<TmdbSeriesDetail>(`/tv/${id}?append_to_response=videos,credits`);
+}
+
+export async function getSimilarSeries(
+  id: number,
+): Promise<TmdbListResult<TmdbSeries>> {
+  return tmdbFetch(`/tv/${id}/similar?page=1`);
 }
 
 export async function getSeriesSeason(

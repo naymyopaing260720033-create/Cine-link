@@ -20,7 +20,7 @@ import WatchButton from "@/components/WatchButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromSeries } from "@/hooks/useFavorites";
 import { useContinueWatching } from "@/hooks/useContinueWatching";
-import SeriesCard from "@/components/SeriesCard";
+import HorizontalRail, { toRailSeries, type RailItem } from "@/components/HorizontalRail";
 import {
   Select,
   SelectContent,
@@ -31,13 +31,12 @@ import {
 import {
   getSeries,
   getSeriesSeason,
-  getTrendingSeries,
+  getSimilarSeries,
   posterUrl,
   profileUrl,
   fetchWithError,
   type TmdbEpisode,
   type TmdbSeasonDetail,
-  type TmdbSeries,
   type TmdbSeriesDetail,
 } from "@/lib/tmdb";
 
@@ -45,7 +44,8 @@ export default function TvDetail() {
   const { id } = useParams<{ id: string }>();
   const seriesId = Number(id);
   const [series, setSeries] = useState<TmdbSeriesDetail | null>(null);
-  const [more, setMore] = useState<TmdbSeries[]>([]);
+  const [similar, setSimilar] = useState<RailItem[]>([]);
+  const [similarLoading, setSimilarLoading] = useState(true);
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
   const [season, setSeason] = useState<TmdbSeasonDetail | null>(null);
   const [selectedEpisodeNumber, setSelectedEpisodeNumber] = useState<number | null>(null);
@@ -63,19 +63,28 @@ export default function TvDetail() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setSimilarLoading(true);
     Promise.all([
       fetchWithError(() => getSeries(seriesId)),
-      fetchWithError(getTrendingSeries),
+      fetchWithError(() => getSimilarSeries(seriesId)),
     ])
-      .then(([data, trend]) => {
+      .then(([data, similarData]) => {
         if (cancelled) return;
         setSeries(data);
-        setMore(trend.results.filter((s) => s.id !== seriesId).slice(0, 12));
+        setSimilar(
+          similarData.results
+            .filter((s) => s.id !== seriesId && Boolean(s.poster_path))
+            .slice(0, 12)
+            .map(toRailSeries),
+        );
         window.scrollTo(0, 0);
       })
       .catch(() => {})
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          setSimilarLoading(false);
+        }
       });
     return () => {
       cancelled = true;
@@ -511,20 +520,13 @@ export default function TvDetail() {
           </div>
         </div>
 
-        {/* More series */}
-        {more.length > 0 && (
-          <div className="mt-16 pt-10 border-t border-border">
-            <h2 className="font-display font-bold text-xl mb-6">
-              More to Watch
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-4 gap-y-8">
-              {more.map((s, i) => (
-                <SeriesCard key={s.id} series={s} index={i} />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+      <HorizontalRail
+        title="Similar Series"
+        viewAllHref="/search?type=tv"
+        items={similar}
+        loading={similarLoading}
+      />
     </SiteLayout>
   );
 }

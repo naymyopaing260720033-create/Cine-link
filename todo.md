@@ -26,3 +26,9 @@
 - [x] Inspect Home rail composition and TMDB endpoints for recent movie and series data.
 - [x] Add a responsive Recently Added horizontal section with loading skeletons.
 - [x] Verify populated and fallback states at desktop and mobile widths.
+
+## Similar Titles on Detail Pages
+
+- [x] Inspect movie and series detail layouts, TMDB types, and reusable rail components.
+- [x] Add TMDB similar-content endpoints and responsive rails below both detail pages.
+- [x] Verify populated, loading, empty, and responsive states.

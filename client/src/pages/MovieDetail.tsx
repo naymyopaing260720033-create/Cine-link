@@ -20,13 +20,13 @@ import TrailerPanel from "@/components/TrailerPanel";
 import WatchButton from "@/components/WatchButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromMovie } from "@/hooks/useFavorites";
+import HorizontalRail, { toRailItem, type RailItem } from "@/components/HorizontalRail";
 import {
   getMovie,
-  getTrending,
+  getSimilarMovies,
   posterUrl,
   profileUrl,
   fetchWithError,
-  type TmdbMovie,
   type TmdbMovieDetail,
 } from "@/lib/tmdb";
 
@@ -34,29 +34,35 @@ export default function MovieDetail() {
   const { id } = useParams<{ id: string }>();
   const movieId = Number(id);
   const [movie, setMovie] = useState<TmdbMovieDetail | null>(null);
-  const [more, setMore] = useState<TmdbMovie[]>([]);
+  const [similar, setSimilar] = useState<RailItem[]>([]);
+  const [similarLoading, setSimilarLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setSimilarLoading(true);
     Promise.all([
       fetchWithError(() => getMovie(movieId)),
-      fetchWithError(getTrending),
+      fetchWithError(() => getSimilarMovies(movieId)),
     ])
-      .then(([data, trend]) => {
+      .then(([data, similarData]) => {
         if (cancelled) return;
         setMovie(data);
-        setMore(
-          trend.results
-            .filter((m) => m.id !== movieId)
-            .slice(0, 12),
+        setSimilar(
+          similarData.results
+            .filter((m) => m.id !== movieId && Boolean(m.poster_path))
+            .slice(0, 12)
+            .map(toRailItem),
         );
         window.scrollTo(0, 0);
       })
       .catch(() => {})
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          setSimilarLoading(false);
+        }
       });
     return () => {
       cancelled = true;
@@ -253,29 +259,13 @@ export default function MovieDetail() {
           </div>
         </div>
 
-        {/* More movies */}
-        {more.length > 0 && (
-          <div className="mt-16 pt-10 border-t border-border">
-            <h2 className="font-display font-bold text-xl mb-6">
-              More to Watch
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-x-4 gap-y-8">
-              {more.map((m, i) => (
-                <div key={m.id} className="w-full">
-                  <MovieCardInner movie={m} index={i} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+      <HorizontalRail
+        title="Similar Movies"
+        viewAllHref="/search"
+        items={similar}
+        loading={similarLoading}
+      />
     </SiteLayout>
   );
-}
-
-/* small inline card to avoid circular layout issues with the main rail card */
-import MovieCard from "@/components/MovieCard";
-
-function MovieCardInner(props: { movie: TmdbMovie; index?: number }) {
-  return <MovieCard {...props} />;
 }
