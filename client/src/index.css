@@ -97,8 +97,8 @@
   --poster-cta-bg: oklch(0.12 0.02 260 / 0.86);
   --poster-badge-bg: oklch(0.12 0.02 260 / 0.8);
   --poster-favorite-bg: oklch(0.995 0.006 80 / 0.92);
-  --hero-poster-opacity: 0.86;
-  --hero-poster-wash: linear-gradient(90deg, oklch(0.97 0.012 80 / 0.7), transparent 38%, oklch(0.97 0.012 80 / 0.06));
+  --hero-poster-opacity: 0.98;
+  --hero-poster-wash: linear-gradient(90deg, oklch(0.97 0.012 80 / 0.32), transparent 30%, oklch(0.97 0.012 80 / 0.02));
   --hero-poster-edge: oklch(0.72 0.16 70 / 0.35);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -153,8 +153,8 @@
   --poster-cta-bg: oklch(0.02 0.01 260 / 0.86);
   --poster-badge-bg: oklch(0.02 0.01 260 / 0.82);
   --poster-favorite-bg: oklch(0.16 0.018 260 / 0.86);
-  --hero-poster-opacity: 0.9;
-  --hero-poster-wash: linear-gradient(90deg, oklch(0.16 0.018 260 / 0.58), transparent 36%, oklch(0.16 0.018 260 / 0.08));
+  --hero-poster-opacity: 1;
+  --hero-poster-wash: linear-gradient(90deg, oklch(0.16 0.018 260 / 0.28), transparent 30%, oklch(0.16 0.018 260 / 0.03));
   --hero-poster-edge: oklch(0.78 0.15 70 / 0.28);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -199,7 +199,7 @@
   }
   .hero-poster {
     opacity: var(--hero-poster-opacity);
-    filter: saturate(0.92) contrast(1.04);
+    filter: saturate(1.02) contrast(1.06) brightness(1.08);
   }
   .hero-poster-wash {
     background: var(--hero-poster-wash);

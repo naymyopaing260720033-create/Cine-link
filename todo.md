@@ -62,3 +62,9 @@
 - [x] Inspect the current Home hero featured selection and TMDB data flow.
 - [x] Replace the fixed Spider-Man hero with dynamic TMDB-powered featured content.
 - [x] Verify the hero poster/backdrop at mobile and desktop widths, then save a checkpoint.
+
+## Home Hero Poster Brightness
+
+- [x] Inspect the poster wash, edge, and image contrast layers in the hero.
+- [x] Increase featured poster brightness while preserving readable hero copy.
+- [x] Verify dark/light mode behavior at desktop and mobile widths, then save a checkpoint.
