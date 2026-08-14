@@ -50,3 +50,9 @@
 - [x] Inspect the Home hero CTA markup and current theme-aware button styles.
 - [x] Change the primary CTA to “Watch Here” with balanced sizing and strengthen the Details border.
 - [x] Verify the revised hero at mobile and desktop widths.
+
+## Recently Added Movie Ordering
+
+- [x] Inspect the current Recently Added data flow and rail composition.
+- [x] Show movies only and order them newest-first by TMDB release date.
+- [x] Verify ordering, loading/empty states, and responsive behavior.

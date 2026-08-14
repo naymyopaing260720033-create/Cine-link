@@ -1,7 +1,7 @@
 /*
  * MIDNIGHT MARQUEE — Home (reference: teleTV style).
  * Featured hero (full-bleed backdrop, meta row, Watch Now + Details),
- * then horizontal scroll sections: Movies, Series, Recently Added, Latest Update.
+ * then horizontal scroll sections: Movies, Series, Recently Added Movies, Latest Update.
  * No tab switcher — movies and series show as their own rails.
  */
 import { useEffect, useState } from "react";
@@ -22,7 +22,6 @@ import {
   getTrendingSeries,
   getPopularSeries,
   getRecentlyAddedMovies,
-  getRecentlyAddedSeries,
   posterUrl,
   movieYear,
   seriesYear,
@@ -52,9 +51,8 @@ export default function Home() {
       fetchWithError(getTrendingSeries),
       fetchWithError(getPopularSeries),
       fetchWithError(getRecentlyAddedMovies),
-      fetchWithError(getRecentlyAddedSeries),
     ])
-      .then(([trend, pop, trendSeries, popSeries, recentMovies, recentSeries]) => {
+      .then(([trend, pop, trendSeries, popSeries, recentMovies]) => {
         if (cancelled) return;
         const t = trend.results as TmdbMovie[];
         setFeatured(t[0] ? { kind: "movie", data: t[0] } : null);
@@ -67,16 +65,11 @@ export default function Home() {
             .map((s) => toRailSeries(s)),
         );
         setRecentlyAdded(
-          [
-            ...(recentMovies.results as TmdbMovie[]).map((m) => toRailItem(m)),
-            ...(recentSeries.results as TmdbSeries[]).map((s) => toRailSeries(s)),
-          ]
-            .sort((a, b) => {
-              const aDate = a.kind === "movie" ? a.data.release_date : a.data.first_air_date;
-              const bDate = b.kind === "movie" ? b.data.release_date : b.data.first_air_date;
-              return new Date(bDate || 0).getTime() - new Date(aDate || 0).getTime();
-            })
-            .slice(0, 20),
+          (recentMovies.results as TmdbMovie[])
+            .filter((movie) => movie.release_date && movie.poster_path)
+            .sort((a, b) => b.release_date.localeCompare(a.release_date))
+            .slice(0, 20)
+            .map((movie) => toRailItem(movie)),
         );
         setLatest(
           (pop.results as TmdbMovie[])
@@ -263,7 +256,7 @@ export default function Home() {
         loading={loading}
       />
       <HorizontalRail
-        title="Recently Added"
+        title="Recently Added Movies"
         viewAllHref="/search"
         items={recentlyAdded}
         loading={loading}
