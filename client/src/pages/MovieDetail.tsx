@@ -1,7 +1,7 @@
 /*
  * MIDNIGHT MARQUEE — Movie detail.
  * Split layout: 1/3 poster rail + 2/3 content zone.
- * Signature marquee "Watch on Telegram" CTA + copyable bot command.
+ * Signature marquee "Watch on Telegram" CTA + inline trailer playback.
  */
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
@@ -12,6 +12,7 @@ import {
   Play,
   ArrowLeft,
   Youtube,
+  X,
   Loader2,
 } from "lucide-react";
 import MarqueeSkeleton from "@/components/MarqueeSkeleton";
@@ -36,10 +37,12 @@ export default function MovieDetail() {
   const [movie, setMovie] = useState<TmdbMovieDetail | null>(null);
   const [more, setMore] = useState<TmdbMovie[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showTrailer, setShowTrailer] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setShowTrailer(false);
     Promise.all([
       fetchWithError(() => getMovie(movieId)),
       fetchWithError(getTrending),
@@ -186,9 +189,6 @@ export default function MovieDetail() {
               <span className="inline-flex items-center gap-1.5 text-gold font-semibold">
                 <Star className="h-4 w-4 fill-gold" />
                 {movie.vote_average.toFixed(1)}
-                <span className="text-muted-foreground/70 font-normal">
-                  ({movie.vote_count.toLocaleString()} votes)
-                </span>
               </span>
               {year && (
                 <span className="inline-flex items-center gap-1.5">
@@ -221,15 +221,33 @@ export default function MovieDetail() {
 
             {/* trailer */}
             {trailer && (
-              <a
-                href={`https://www.youtube.com/watch?v=${trailer.key}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-medium text-gold hover:text-foreground transition-colors"
-              >
-                <Youtube className="h-4.5 w-4.5" />
-                Watch trailer on YouTube
-              </a>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  aria-expanded={showTrailer}
+                  onClick={() => setShowTrailer((current) => !current)}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-gold hover:text-foreground transition-colors"
+                >
+                  {showTrailer ? (
+                    <X className="h-4 w-4" />
+                  ) : (
+                    <Youtube className="h-4 w-4" />
+                  )}
+                  {showTrailer ? "Close trailer" : "Watch trailer on this page"}
+                </button>
+
+                {showTrailer && (
+                  <div className="relative overflow-hidden rounded-xl border border-border bg-black shadow-2xl aspect-video max-w-3xl">
+                    <iframe
+                      className="absolute inset-0 h-full w-full"
+                      src={`https://www.youtube-nocookie.com/embed/${trailer.key}?autoplay=1&rel=0`}
+                      title={`${movie.title} trailer`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+              </div>
             )}
 
             {/* cast */}
