@@ -20,3 +20,9 @@
 - [x] Inspect the shared desktop/mobile menu and browse route handling.
 - [x] Replace genre links with Home, Movies, and Series only.
 - [x] Verify each navigation item at desktop and mobile widths.
+
+## Recently Added Section
+
+- [x] Inspect Home rail composition and TMDB endpoints for recent movie and series data.
+- [x] Add a responsive Recently Added horizontal section with loading skeletons.
+- [x] Verify populated and fallback states at desktop and mobile widths.

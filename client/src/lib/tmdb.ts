@@ -188,6 +188,13 @@ export async function getPopular(page = 1): Promise<TmdbListResult<TmdbMovie>> {
   return tmdbFetch(`/movie/popular?page=${page}`);
 }
 
+export async function getRecentlyAddedMovies(): Promise<TmdbListResult<TmdbMovie>> {
+  const today = new Date().toISOString().slice(0, 10);
+  return tmdbFetch(
+    `/discover/movie?sort_by=primary_release_date.desc&primary_release_date.lte=${today}&vote_count.gte=5&page=1`,
+  );
+}
+
 export async function getNowPlaying(): Promise<TmdbListResult<TmdbMovie>> {
   return tmdbFetch("/movie/now_playing");
 }
@@ -235,6 +242,13 @@ export async function getPopularSeries(
   page = 1,
 ): Promise<TmdbListResult<TmdbSeries>> {
   return tmdbFetch(`/tv/popular?page=${page}`);
+}
+
+export async function getRecentlyAddedSeries(): Promise<TmdbListResult<TmdbSeries>> {
+  const today = new Date().toISOString().slice(0, 10);
+  return tmdbFetch(
+    `/discover/tv?sort_by=first_air_date.desc&first_air_date.lte=${today}&vote_count.gte=5&page=1`,
+  );
 }
 
 export async function getTopRatedSeries(): Promise<TmdbListResult<TmdbSeries>> {

@@ -1,7 +1,7 @@
 /*
  * MIDNIGHT MARQUEE — Home (reference: teleTV style).
  * Featured hero (full-bleed backdrop, meta row, Watch Now + Details),
- * then horizontal scroll sections: Movies, Series, Latest Update.
+ * then horizontal scroll sections: Movies, Series, Recently Added, Latest Update.
  * No tab switcher — movies and series show as their own rails.
  */
 import { useEffect, useState } from "react";
@@ -21,6 +21,8 @@ import {
   getPopular,
   getTrendingSeries,
   getPopularSeries,
+  getRecentlyAddedMovies,
+  getRecentlyAddedSeries,
   posterUrl,
   movieYear,
   seriesYear,
@@ -35,6 +37,7 @@ export default function Home() {
   const [featured, setFeatured] = useState<RailItem | null>(null);
   const [movies, setMovies] = useState<RailItem[]>([]);
   const [series, setSeries] = useState<RailItem[]>([]);
+  const [recentlyAdded, setRecentlyAdded] = useState<RailItem[]>([]);
   const [latest, setLatest] = useState<RailItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { entry: continueEntry } = useContinueWatching();
@@ -48,8 +51,10 @@ export default function Home() {
       fetchWithError(getPopular),
       fetchWithError(getTrendingSeries),
       fetchWithError(getPopularSeries),
+      fetchWithError(getRecentlyAddedMovies),
+      fetchWithError(getRecentlyAddedSeries),
     ])
-      .then(([trend, pop, trendSeries, popSeries]) => {
+      .then(([trend, pop, trendSeries, popSeries, recentMovies, recentSeries]) => {
         if (cancelled) return;
         const t = trend.results as TmdbMovie[];
         setFeatured(t[0] ? { kind: "movie", data: t[0] } : null);
@@ -60,6 +65,18 @@ export default function Home() {
           (trendSeries.results as TmdbSeries[])
             .slice(0, 20)
             .map((s) => toRailSeries(s)),
+        );
+        setRecentlyAdded(
+          [
+            ...(recentMovies.results as TmdbMovie[]).map((m) => toRailItem(m)),
+            ...(recentSeries.results as TmdbSeries[]).map((s) => toRailSeries(s)),
+          ]
+            .sort((a, b) => {
+              const aDate = a.kind === "movie" ? a.data.release_date : a.data.first_air_date;
+              const bDate = b.kind === "movie" ? b.data.release_date : b.data.first_air_date;
+              return new Date(bDate || 0).getTime() - new Date(aDate || 0).getTime();
+            })
+            .slice(0, 20),
         );
         setLatest(
           (pop.results as TmdbMovie[])
@@ -236,6 +253,12 @@ export default function Home() {
         title="Series"
         viewAllHref="/search?type=tv"
         items={series}
+        loading={loading}
+      />
+      <HorizontalRail
+        title="Recently Added"
+        viewAllHref="/search"
+        items={recentlyAdded}
         loading={loading}
       />
       <HorizontalRail
