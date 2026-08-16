@@ -182,3 +182,9 @@
 - [x] Re-check the corrected `naymyopaing260720033-create/Cine-link` repository and its current branch state.
 - [x] Retry pushing the prepared local CineLink commit with the refreshed GitHub authorization.
 - [x] Verify the remote commit and confirm that `package.json`, `vercel.json`, and `client/` are present.
+
+## Python Backend GitHub Publishing
+
+- [ ] Verify the latest Python webhook implementation and local Git working tree before commit.
+- [ ] Push the Python bot, Vercel configuration, tests, and backend setup documentation to `main`.
+- [ ] Verify the remote backend files and provide Vercel deployment readiness steps.
