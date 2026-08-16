@@ -138,7 +138,31 @@
 - [x] Compare Vercel request-based webhook hosting with Supabase Edge Functions and persistent workers.
 - [x] Define the Vercel API route boundary for channel ingestion and `/start` deep-link delivery.
 - [x] Confirm runtime limits, retry/idempotency handling, and server-side secret requirements.
-- [ ] Decide whether the TypeScript bot will live alongside the CineLink website on Vercel.
+- [x] Deploy the Python webhook bot alongside the CineLink website on Vercel.
+
+## Telegram Channel Auto-Publishing Flow
+
+- [x] Verify Telegram Bot API channel-update and webhook requirements for private Movies and Series channels.
+- [x] Define the caption validation, TMDB enrichment, and idempotent MongoDB publishing sequence.
+- [x] Define admin-visible success, rejection, retry, and audit-log behavior for channel posts.
+- [x] Confirm immediate publication for valid channel posts before backend coding begins.
+
+### Auto-Publish Implementation Prerequisites
+
+- [ ] Collect the Telegram bot token, private Movies/Series channel IDs, and a webhook secret through secure project settings.
+- [ ] Collect the private Telegram operational-log channel ID and give the bot permission to post there.
+- [ ] Collect the MongoDB Atlas connection string and Supabase project configuration through secure project settings.
+- [x] Create the Vercel webhook route, caption parser, idempotent catalog storage, and audit logging.
+- [x] Send deduplicated publish, rejection, and retryable-failure notifications to the private operational-log channel.
+- [ ] Configure Telegram's webhook and verify an authorized test post from each source channel.
+
+## Python Telegram Bot Implementation
+
+- [x] Review the Python webhook deployment model and dependencies for the chosen hosting route.
+- [x] Implement secure Telegram update verification, channel allowlisting, strict caption parsing, and idempotency.
+- [x] Implement TMDB enrichment, MongoDB catalog persistence, Supabase audit records, and log-channel notifications.
+- [x] Implement `/start` payload lookup and authorized media delivery from the private source channels.
+- [x] Add deployment configuration, environment-variable documentation, tests, and a webhook setup guide.
 
 ## Frontend Vercel Hosting Preparation
 
