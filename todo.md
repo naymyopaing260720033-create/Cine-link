@@ -194,3 +194,9 @@
 - [x] Inspect the notification client and define mocked success, rejection, and retryable-failure delivery cases.
 - [x] Run a local simulation without sending messages to the private operational-log channel.
 - [x] Report the simulated result and the requirements for a live channel test.
+
+## Auto-Publish Simulation GitHub Publishing
+
+- [ ] Verify the latest notification simulation changes and local Git state.
+- [ ] Push the safe notification tests and implementation updates to `main`.
+- [ ] Verify the remote commit and report the GitHub result.
