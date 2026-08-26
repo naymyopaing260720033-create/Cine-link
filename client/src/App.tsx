@@ -11,6 +11,7 @@ import GenrePage from "./pages/GenrePage";
 import Admin from "./pages/Admin";
 import TvDetail from "./pages/TvDetail";
 import Favorites from "./pages/Favorites";
+import ColorDirections from "./pages/ColorDirections";
 import { FavoritesProvider } from "./hooks/useFavorites";
 
 
@@ -24,6 +25,7 @@ function Router() {
       <Route path={"/tv/:id"} component={TvDetail} />
       <Route path={"/favorites"} component={Favorites} />
       <Route path={"/admin"} component={Admin} />
+      <Route path={"/_color-directions"} component={ColorDirections} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

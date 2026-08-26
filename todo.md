@@ -225,4 +225,41 @@
 - [x] Apply systemic marquee motifs to the hero, CTA, section headers, count labels, and rail controls.
 - [x] Increase hero drama and physical-media texture while retaining readable content and responsive behavior.
 - [x] Replace visible placeholder Telegram branding with polished configured-state copy.
-- [ ] Validate the refined composition, save a checkpoint, and deliver the update.
+- [x] Validate the refined composition, save a checkpoint, and deliver the update.
+
+## Movie Detail Synopsis Refinement
+
+- [x] Inspect the current synopsis layout, typography, and mobile behavior.
+- [ ] Confirm the preferred synopsis presentation before editing.
+- [ ] Implement the approved synopsis treatment and validate responsive behavior.
+
+## Manual Myanmar Movie Details
+
+- [x] Review the current static movie detail flow and planned backend catalog boundary.
+- [x] Present maintainable approaches for manually adding Burmese movie details.
+- [ ] Confirm the selected content-management workflow before implementation.
+
+## Color Design Direction
+
+- [x] Review the current palette and preserve readable contrast across dark and light themes.
+- [x] Prepare distinct visual color directions for CineLink.
+- [x] Deliver color direction mockup images for user comparison.
+- [x] Confirm the user-selected palette before implementation.
+- [x] Apply and validate the selected color system across the public UI.
+
+## Additional Color Concepts
+
+- [x] Define new color directions with accessible dark/light contrast and distinct CineLink personality.
+- [x] Generate and deliver additional color mockup images for comparison.
+
+## Midnight Teal & Emerald Implementation
+
+- [x] Define semantic dark/light tokens for the B/C fusion palette.
+- [x] Apply teal/emerald treatment to hero, cards, controls, badges, and Telegram CTA states.
+- [x] Validate accessibility contrast and responsive dark/light presentation.
+
+## Marquee Amber and Editorial Detail Reinforcement
+
+- [x] Restore Marquee Amber to brand, rating, section, and warm-projector moments while preserving emerald action states.
+- [x] Recompose movie and series details as poster/backdrop-led cinematic feature pages.
+- [x] Add consistent ticket texture and editorial rhythm to detail-page content zones and rails.

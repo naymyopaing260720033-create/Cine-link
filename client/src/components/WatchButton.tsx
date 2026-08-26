@@ -133,7 +133,7 @@ export default function WatchButton({
       <Button
         size={btnSize}
         onClick={telegramReady ? undefined : showSetupNotice}
-        className={`marquee-chip bg-primary text-primary-foreground font-bold gap-2.5 hover:shadow-[0_0_28px_oklch(0.78_0.15_70/0.4)] hover:brightness-105 active:scale-[0.97] transition-all duration-200 ${sizes[size]} ${className}`}
+        className={`marquee-chip teal-cta-glow bg-primary text-primary-foreground font-bold gap-2.5 hover:brightness-105 active:scale-[0.97] transition-all duration-200 ${sizes[size]} ${className}`}
       >
         <Send className="h-4.5 w-4.5" />
         {label}

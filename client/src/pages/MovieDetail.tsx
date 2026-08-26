@@ -160,9 +160,9 @@ export default function MovieDetail() {
           Go back
         </Link>
 
-        <div className="grid gap-8 md:grid-cols-[240px_minmax(0,1fr)] md:gap-12">
+        <div className="detail-feature-shell relative grid gap-8 rounded-2xl p-5 sm:p-7 md:grid-cols-[240px_minmax(0,1fr)] md:gap-12 md:p-10">
           {/* poster rail */}
-          <div className="w-full max-w-[220px] md:max-w-[240px] mx-auto md:mx-0">
+          <div className="detail-poster-rail z-10 w-full max-w-[220px] md:max-w-[240px] mx-auto md:mx-0">
             <img
               src={posterUrl(movie.poster_path, "w342") || ""}
               alt={movie.title}
@@ -186,7 +186,8 @@ export default function MovieDetail() {
           </div>
 
           {/* content zone */}
-          <div className="space-y-6">
+          <div className="relative z-10 space-y-6">
+            <p className="detail-kicker">Feature Presentation</p>
             {movie.tagline && (
               <p className="text-sm italic text-gold font-display">
                 "{movie.tagline}"
@@ -226,16 +227,20 @@ export default function MovieDetail() {
               ))}
             </div>
 
-            <p className="text-muted-foreground leading-relaxed max-w-2xl">
-              {movie.overview || "No overview available."}
-            </p>
+            <section className="detail-synopsis">
+              <p className="detail-synopsis-label">Synopsis</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {movie.overview || "No overview available."}
+              </p>
+            </section>
 
             {/* trailer */}
             <TrailerPanel title={movie.title} trailerKey={trailer?.key} />
 
             {/* cast */}
             {cast.length > 0 && (
-              <div className="pt-4 border-t border-border">
+              <div className="detail-content-rail pt-5 border-t">
+                <p className="detail-kicker mb-1">On the Marquee</p>
                 <h3 className="font-display font-bold text-lg mb-4">Cast</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {cast.map((c) => (

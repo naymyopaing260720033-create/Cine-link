@@ -99,7 +99,7 @@ export default function HorizontalRail({
         {/* section header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <span className="marquee-marker flex h-9 w-9 items-center justify-center text-primary">
+            <span className="marquee-marker flex h-9 w-9 items-center justify-center text-gold">
               <Play className="h-4 w-4 fill-current" />
             </span>
             <div className="min-w-0">

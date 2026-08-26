@@ -71,6 +71,8 @@ Marquee Amber — oklch(0.78 0.15 70) — the glow that unmistakably owns the br
 - Marquee language is systemic: CTAs, section markers, count labels, rail controls, and active navigation share clipped ticket geometry, amber edges, and restrained projector glow.
 - The hero is CineLink's show-opening moment, combining a stronger off-canvas poster anchor, warm projection light, film-grain texture, and an editorial Fraunces title treatment.
 - Polished UI never displays a placeholder bot identity. Before a real username is configured, Telegram delivery is described as being prepared. The user-selected `Watch Here` label remains unchanged.
+- Midnight Teal & Emerald is the selected color system: petrol-navy darkness creates the cinema hall, jade-emerald drives watch and active states, sea-glass surfaces establish hierarchy, and cool silver/ivory keeps artwork text readable. The light theme becomes a cool sea-glass screening rather than a warm-paper inverse.
+- Marquee Amber remains CineLink's warm theatre signature rather than being replaced by teal: it belongs to the wordmark, ratings, section markers, count labels, NEW details, and projection warmth. Emerald is intentionally reserved for Telegram/action/selection states. Movie and series details open as editorial feature cards with poster rails, cinema-program labels, and a ticket-edged synopsis treatment.
 
 ## Telegram Integration Plan (functional spec)
 - TMDB API (free public endpoints, API key configurable via env constant `VITE_TMDB_API_KEY`, fallback to demo via env-driven switch).

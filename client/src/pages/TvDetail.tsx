@@ -274,9 +274,9 @@ export default function TvDetail() {
           Back home
         </Link>
 
-        <div className="grid md:grid-cols-[320px_1fr] gap-10 md:gap-14">
+        <div className="detail-feature-shell relative grid gap-10 rounded-2xl p-5 sm:p-7 md:grid-cols-[320px_1fr] md:gap-14 md:p-10">
           {/* poster rail */}
-          <div className="shrink-0">
+          <div className="detail-poster-rail relative z-10 shrink-0">
             <img
               src={posterUrl(series.poster_path, "w780") || ""}
               alt={series.name}
@@ -289,7 +289,8 @@ export default function TvDetail() {
           </div>
 
           {/* content zone */}
-          <div className="space-y-6">
+          <div className="relative z-10 space-y-6">
+            <p className="detail-kicker">Series Presentation</p>
             {series.tagline && (
               <p className="text-sm italic text-gold font-display">
                 "{series.tagline}"
@@ -333,15 +334,18 @@ export default function TvDetail() {
               ))}
             </div>
 
-            <p className="text-muted-foreground leading-relaxed max-w-2xl">
-              {series.overview || "No overview available."}
-            </p>
+            <section className="detail-synopsis">
+              <p className="detail-synopsis-label">Synopsis</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {series.overview || "No overview available."}
+              </p>
+            </section>
 
             {/* trailer */}
             <TrailerPanel title={series.name} trailerKey={trailer?.key} />
 
             {/* season and episode picker */}
-            <section className="pt-6 border-t border-border space-y-5">
+            <section className="detail-content-rail pt-6 border-t space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 <div>
                   <p className="text-[0.68rem] uppercase tracking-[0.24em] text-gold font-semibold">
@@ -410,7 +414,7 @@ export default function TvDetail() {
                           }}
                           className={`text-left rounded-lg border p-3 transition-all duration-200 active:scale-[0.98] ${
                             isSelected
-                              ? "border-primary bg-primary/10 shadow-[0_0_22px_oklch(0.78_0.15_70/0.12)]"
+                              ? "episode-selected border-primary bg-primary/10"
                               : "border-border bg-secondary/20 hover:border-primary/50 hover:bg-secondary/40"
                           }`}
                           style={{ animation: `fadeUp 320ms var(--ease-out) ${index * 35}ms both` }}

@@ -357,7 +357,7 @@ export default function Home() {
             >
               <Button
                 size="sm"
-                className="marquee-chip bg-primary text-primary-foreground font-semibold gap-1.5 hover:shadow-[0_0_20px_oklch(0.78_0.15_70/0.35)] transition-shadow duration-200 active:scale-[0.97]"
+                className="marquee-chip teal-cta-glow bg-primary text-primary-foreground font-semibold gap-1.5 transition-shadow duration-200 active:scale-[0.97]"
               >
                 <Send className="h-3.5 w-3.5" />
                 Enter Telegram
