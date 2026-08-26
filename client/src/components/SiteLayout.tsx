@@ -7,7 +7,7 @@ import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { Search, Send, Menu, X, Heart, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { loadConfig } from "@/lib/config";
+import { hasConfiguredTelegramBot, loadConfig } from "@/lib/config";
 import { toast } from "sonner";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -18,6 +18,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
   const cfg = loadConfig();
+  const telegramReady = hasConfiguredTelegramBot(cfg.telegramBotUsername);
   const { favorites } = useFavorites();
   const { theme, toggleTheme } = useTheme();
   const nextTheme = theme === "dark" ? "light" : "dark";
@@ -45,8 +46,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               alt="CineLink logo"
               className="h-9 w-9 object-contain"
             />
-            <span className="font-display font-black text-xl tracking-tight text-foreground">
-              Cine<span className="text-gold">Link</span>
+            <span className="cinelink-wordmark font-display font-black text-xl tracking-tight text-foreground">
+              CineL<span className="wordmark-film-i">i</span>nk
             </span>
           </Link>
 
@@ -57,7 +58,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 href={item.href}
                 className={`text-sm font-medium transition-colors duration-150 ${
                   isNavItemActive(item.href)
-                    ? "text-gold"
+                    ? "nav-marquee-active text-gold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -104,20 +105,32 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             >
               {theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
             </Button>
-            <a
-              href={`https://t.me/${cfg.telegramBotUsername}`}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden sm:inline-flex"
-            >
+            {telegramReady ? (
+              <a
+                href={`https://t.me/${cfg.telegramBotUsername}`}
+                target="_blank"
+                rel="noreferrer"
+                className="hidden sm:inline-flex"
+              >
+                <Button
+                  size="sm"
+                  className="marquee-chip bg-primary text-primary-foreground font-semibold gap-1.5 hover:shadow-[0_0_20px_oklch(0.78_0.15_70/0.35)] transition-shadow duration-200 active:scale-[0.97]"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  Telegram
+                </Button>
+              </a>
+            ) : (
               <Button
                 size="sm"
-                className="marquee-chip bg-primary text-primary-foreground font-semibold gap-1.5 hover:shadow-[0_0_20px_oklch(0.78_0.15_70/0.35)] transition-shadow duration-200 active:scale-[0.97]"
+                disabled
+                className="marquee-chip hidden sm:inline-flex bg-primary/70 text-primary-foreground font-semibold gap-1.5 opacity-75"
+                title="Telegram bot setup pending"
               >
                 <Send className="h-3.5 w-3.5" />
-                Telegram
+                Telegram soon
               </Button>
-            </a>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -156,15 +169,17 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 {theme === "dark" ? <Sun className="h-4 w-4 text-gold" /> : <Moon className="h-4 w-4 text-gold" />}
                 Use {nextTheme} mode
               </button>
-              <a
-                href={`https://t.me/${cfg.telegramBotUsername}`}
-                target="_blank"
-                rel="noreferrer"
-                className="py-2.5 px-2 text-sm font-semibold text-gold flex items-center gap-2"
-              >
-                <Send className="h-4 w-4" />
-                Watch on Telegram
-              </a>
+              {telegramReady && (
+                <a
+                  href={`https://t.me/${cfg.telegramBotUsername}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="py-2.5 px-2 text-sm font-semibold text-gold flex items-center gap-2"
+                >
+                  <Send className="h-4 w-4" />
+                  Open Telegram
+                </a>
+              )}
             </div>
           </div>
         )}
@@ -176,8 +191,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <div className="container py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <img src={LOGO} alt="" className="h-7 w-7 object-contain" />
-            <span className="font-display font-bold text-foreground">
-              Cine<span className="text-gold">Link</span>
+            <span className="cinelink-wordmark font-display font-bold text-foreground">
+              CineL<span className="wordmark-film-i">i</span>nk
             </span>
           </div>
           <p className="text-xs text-muted-foreground">

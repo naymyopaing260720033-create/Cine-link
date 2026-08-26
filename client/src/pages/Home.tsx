@@ -30,21 +30,30 @@ import {
   type TmdbMovie,
   type TmdbSeries,
 } from "@/lib/tmdb";
-import { loadConfig } from "@/lib/config";
+import { hasConfiguredTelegramBot, loadConfig } from "@/lib/config";
 import { useContinueWatching } from "@/hooks/useContinueWatching";
 import { useViewedMovies } from "@/hooks/useViewedMovies";
+
+function formatCatalogCount(total: number | null) {
+  if (total === null || total < 1) return null;
+  if (total >= 10_000) return `${Math.floor(total / 1_000)}K+ titles`;
+  return `${total.toLocaleString("en-US")} titles`;
+}
 
 export default function Home() {
   const [featuredPool, setFeaturedPool] = useState<RailItem[]>([]);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [movies, setMovies] = useState<RailItem[]>([]);
   const [series, setSeries] = useState<RailItem[]>([]);
+  const [movieCatalogCount, setMovieCatalogCount] = useState<number | null>(null);
+  const [seriesCatalogCount, setSeriesCatalogCount] = useState<number | null>(null);
   const [recentlyAdded, setRecentlyAdded] = useState<RailItem[]>([]);
   const [latest, setLatest] = useState<RailItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { entry: continueEntry } = useContinueWatching();
   const { viewedMovieIds } = useViewedMovies();
   const cfg = loadConfig();
+  const telegramReady = hasConfiguredTelegramBot(cfg.telegramBotUsername);
   const featured = featuredPool[featuredIndex] ?? null;
 
   useEffect(() => {
@@ -93,7 +102,10 @@ export default function Home() {
             .slice(0, 20)
             .map((m) => toRailItem(m)),
         );
-        void popSeries; // reserved for future section
+        setMovieCatalogCount(typeof pop.total_results === "number" ? pop.total_results : null);
+        setSeriesCatalogCount(
+          typeof popSeries.total_results === "number" ? popSeries.total_results : null,
+        );
         window.scrollTo(0, 0);
       })
       .catch(() => {})
@@ -148,6 +160,8 @@ export default function Home() {
                 className="hero-backdrop hero-backdrop-crossfade absolute inset-0 h-full w-full object-cover"
               />
               <div className="hero-overlay absolute inset-0" />
+              <div className="hero-projection absolute inset-0" />
+              <div className="hero-grain absolute inset-0" />
             </>
           )}
 
@@ -167,10 +181,10 @@ export default function Home() {
           )}
 
           <div className="container relative py-8 sm:py-10 md:py-20">
-            <div className="relative z-10 max-w-full space-y-3 sm:max-w-[78%] sm:space-y-4 md:max-w-2xl">
+            <div className="hero-copy relative z-10 max-w-full space-y-3 sm:max-w-[78%] sm:space-y-4 md:max-w-2xl">
               {/* meta row */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold">
-                <span className="px-2 py-0.5 text-xs font-bold rounded border border-primary/60 text-primary bg-primary/10">
+                <span className="marquee-chip px-2 py-0.5 text-xs font-bold border border-primary/60 text-primary bg-primary/10">
                   1080p
                 </span>
                 {fYear && (
@@ -184,11 +198,11 @@ export default function Home() {
                     {f.vote_average.toFixed(1)}
                   </span>
                 )}
-                <span className="text-muted-foreground">Featured Film</span>
+                <span className="text-muted-foreground">Now Screening</span>
               </div>
 
               <div className="flex h-[4.25rem] items-end overflow-hidden sm:h-[6.5rem] md:h-[8rem]">
-                <h1 className="hero-title line-clamp-2 font-display font-black text-3xl leading-[1.05] text-foreground sm:text-5xl md:text-6xl">
+                <h1 className="hero-title hero-marquee-title line-clamp-2 font-display font-black text-3xl leading-[1.05] text-foreground sm:text-5xl md:text-6xl">
                   {f.title}
                 </h1>
               </div>
@@ -308,6 +322,7 @@ export default function Home() {
       <div className={continueEntry ? "-mt-2 sm:-mt-1" : "-mt-3 sm:-mt-2"}>
         <HorizontalRail
           title="Movies"
+          countLabel={loading ? undefined : formatCatalogCount(movieCatalogCount) || undefined}
           viewAllHref="/search"
           items={movies}
           loading={loading}
@@ -315,6 +330,7 @@ export default function Home() {
       </div>
       <HorizontalRail
         title="Series"
+        countLabel={loading ? undefined : formatCatalogCount(seriesCatalogCount) || undefined}
         viewAllHref="/search?type=tv"
         items={series}
         loading={loading}
@@ -327,25 +343,29 @@ export default function Home() {
       />
 
       {/* ── Bot footer CTA ───────────────────────────────────── */}
-      <section className="border-t border-border bg-card/60">
+      <section className="telegram-marquee border-t border-border bg-card/60">
         <div className="container py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-display font-bold text-lg text-foreground">
-            Stream it from Telegram —{" "}
-            <span className="text-gold">@{cfg.telegramBotUsername}</span>
+            Tonight&apos;s feature, delivered via Telegram
+            {telegramReady && <span className="text-gold"> — @{cfg.telegramBotUsername}</span>}
           </p>
-          <a
-            href={`https://t.me/${cfg.telegramBotUsername}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Button
-              size="sm"
-              className="marquee-chip bg-primary text-primary-foreground font-semibold gap-1.5 hover:shadow-[0_0_20px_oklch(0.78_0.15_70/0.35)] transition-shadow duration-200 active:scale-[0.97]"
+          {telegramReady ? (
+            <a
+              href={`https://t.me/${cfg.telegramBotUsername}`}
+              target="_blank"
+              rel="noreferrer"
             >
-              <Send className="h-3.5 w-3.5" />
-              Go to Bot
-            </Button>
-          </a>
+              <Button
+                size="sm"
+                className="marquee-chip bg-primary text-primary-foreground font-semibold gap-1.5 hover:shadow-[0_0_20px_oklch(0.78_0.15_70/0.35)] transition-shadow duration-200 active:scale-[0.97]"
+              >
+                <Send className="h-3.5 w-3.5" />
+                Enter Telegram
+              </Button>
+            </a>
+          ) : (
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold/85">Telegram delivery is being prepared</p>
+          )}
         </div>
       </section>
     </SiteLayout>

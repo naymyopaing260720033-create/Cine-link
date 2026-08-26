@@ -68,6 +68,9 @@ Marquee Amber — oklch(0.78 0.15 70) — the glow that unmistakably owns the br
 
 - The hero uses a right-side poster anchor with a restrained spotlight frame so the featured artwork, not only the backdrop, carries the opening-screen drama.
 - Hero overlays and poster hover controls are theme-aware: Light mode keeps artwork visible through a softer paper-toned wash while retaining dark image scrims for readable poster actions.
+- Marquee language is systemic: CTAs, section markers, count labels, rail controls, and active navigation share clipped ticket geometry, amber edges, and restrained projector glow.
+- The hero is CineLink's show-opening moment, combining a stronger off-canvas poster anchor, warm projection light, film-grain texture, and an editorial Fraunces title treatment.
+- Polished UI never displays a placeholder bot identity. Before a real username is configured, Telegram delivery is described as being prepared. The user-selected `Watch Here` label remains unchanged.
 
 ## Telegram Integration Plan (functional spec)
 - TMDB API (free public endpoints, API key configurable via env constant `VITE_TMDB_API_KEY`, fallback to demo via env-driven switch).

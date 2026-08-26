@@ -17,11 +17,16 @@ export interface SiteConfig {
 }
 
 export const DEFAULT_CONFIG: SiteConfig = {
-  telegramBotUsername: "YourBotUsername", // <-- REPLACE with your real bot username
+  telegramBotUsername: "",
   telegramMessage:
     "Hi! I'd like to watch a movie. Please send me the streaming link.",
   customIntro: "",
 };
+
+export function hasConfiguredTelegramBot(username: string) {
+  const normalized = username.trim();
+  return Boolean(normalized) && normalized !== "YourBotUsername";
+}
 
 export function loadConfig(): SiteConfig {
   try {

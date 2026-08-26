@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   loadConfig,
+  hasConfiguredTelegramBot,
   telegramDeepLink,
   telegramSeriesStartLink,
   telegramStartLink,
@@ -38,6 +39,7 @@ export default function WatchButton({
 }) {
   const cfg = loadConfig();
   const [copied, setCopied] = useState(false);
+  const telegramReady = hasConfiguredTelegramBot(cfg.telegramBotUsername);
 
   const isEpisode =
     mediaType === "series" &&
@@ -81,19 +83,35 @@ export default function WatchButton({
     }
   };
 
+  const showSetupNotice = () => {
+    toast.info("Telegram delivery is being configured. Please check back shortly.");
+  };
+
   if (variant === "outline") {
     return (
       <div className={`inline-flex items-center gap-2 flex-wrap ${className}`}>
-        <a href={href} target="_blank" rel="noreferrer">
+        {telegramReady ? (
+          <a href={href} target="_blank" rel="noreferrer">
+            <Button
+              size={btnSize}
+              variant="outline"
+              className={`marquee-chip border-primary/60 text-primary hover:bg-primary/10 active:scale-[0.97] ${className}`}
+            >
+              <Send className="h-4 w-4" />
+              Open Telegram
+            </Button>
+          </a>
+        ) : (
           <Button
             size={btnSize}
             variant="outline"
+            onClick={showSetupNotice}
             className={`marquee-chip border-primary/60 text-primary hover:bg-primary/10 active:scale-[0.97] ${className}`}
           >
             <Send className="h-4 w-4" />
-            Open Telegram
+            Telegram setup
           </Button>
-        </a>
+        )}
         <Button
           size={btnSize}
           variant="outline"
@@ -111,22 +129,27 @@ export default function WatchButton({
     );
   }
 
-  return (
+  const button = (
+      <Button
+        size={btnSize}
+        onClick={telegramReady ? undefined : showSetupNotice}
+        className={`marquee-chip bg-primary text-primary-foreground font-bold gap-2.5 hover:shadow-[0_0_28px_oklch(0.78_0.15_70/0.4)] hover:brightness-105 active:scale-[0.97] transition-all duration-200 ${sizes[size]} ${className}`}
+      >
+        <Send className="h-4.5 w-4.5" />
+        {label}
+      </Button>
+  );
+
+  return telegramReady ? (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
       className={`inline-flex min-w-0 ${className}`}
     >
-      <Button
-        size={btnSize}
-        className={`marquee-chip bg-primary text-primary-foreground font-bold gap-2.5 hover:shadow-[0_0_28px_oklch(0.78_0.15_70/0.4)] hover:brightness-105 active:scale-[0.97] transition-all duration-200 ${sizes[size]} ${className}`}
-      >
-        <Send className="h-4.5 w-4.5" />
-        {label}
-      </Button>
+      {button}
     </a>
-  );
+  ) : button;
 }
 
 export function WatchInstructions({ movieId }: { movieId?: number }) {

@@ -200,3 +200,29 @@
 - [x] Verify the latest notification simulation changes and local Git state.
 - [x] Push the safe notification tests and implementation updates to `main`.
 - [x] Verify the remote commit and report the GitHub result.
+
+## Current Codebase Explanation
+
+- [x] Review the current frontend, webhook backend, configuration, and test file structure.
+- [x] Map the Telegram-to-catalog-to-website processing flow and its security controls.
+- [x] Explain implemented functionality, deployment prerequisites, and deferred work to the user.
+
+## UI Refinement and Feature Selection
+
+- [x] Review the current public experience at desktop and mobile sizes to identify visual priorities.
+- [x] Present CineLink-compatible UI refinements and potential feature options.
+- [x] Confirm the user-selected scope before implementation.
+- [x] Implement and validate the agreed UI and feature updates.
+
+## Movies and Series Total Counts
+
+- [x] Inspect the TMDB result model and Home data loading path for total-count support.
+- [x] Add responsive Movies and Series catalog-count stats to the Home interface.
+- [x] Validate TMDB loading/error behavior and desktop/mobile presentation.
+
+## Midnight Marquee Visual Refinement
+
+- [x] Apply systemic marquee motifs to the hero, CTA, section headers, count labels, and rail controls.
+- [x] Increase hero drama and physical-media texture while retaining readable content and responsive behavior.
+- [x] Replace visible placeholder Telegram branding with polished configured-state copy.
+- [ ] Validate the refined composition, save a checkpoint, and deliver the update.

@@ -50,12 +50,14 @@ function itemYear(item: RailItem) {
 
 export default function HorizontalRail({
   title,
+  countLabel,
   viewAllHref,
   items,
   loading = false,
   newMovieIds = [],
 }: {
   title: string;
+  countLabel?: string;
   viewAllHref?: string;
   items: RailItem[];
   loading?: boolean;
@@ -97,12 +99,19 @@ export default function HorizontalRail({
         {/* section header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/15 text-primary">
+            <span className="marquee-marker flex h-9 w-9 items-center justify-center text-primary">
               <Play className="h-4 w-4 fill-current" />
             </span>
-            <h2 className="font-display font-black text-xl md:text-2xl text-foreground">
-              {title}
-            </h2>
+            <div className="min-w-0">
+              <h2 className="font-display font-black text-xl md:text-2xl text-foreground">
+                {title}
+              </h2>
+              {countLabel && (
+                <p className="marquee-count mt-0.5 text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-gold/90">
+                  {countLabel}
+                </p>
+              )}
+            </div>
           </div>
           {viewAllHref && (
             <Link
@@ -121,7 +130,7 @@ export default function HorizontalRail({
             <button
               aria-label="Scroll left"
               onClick={() => scrollBy(-1)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full bg-background/90 border border-border shadow-lg flex items-center justify-center hover:text-gold active:scale-[0.95] transition"
+              className="rail-control absolute left-0 top-1/2 -translate-y-1/2 z-10 h-9 w-9 bg-background/90 border border-primary/35 shadow-lg flex items-center justify-center hover:text-gold active:scale-[0.95] transition"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -130,7 +139,7 @@ export default function HorizontalRail({
             <button
               aria-label="Scroll right"
               onClick={() => scrollBy(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-9 w-9 rounded-full bg-background/90 border border-border shadow-lg flex items-center justify-center hover:text-gold active:scale-[0.95] transition"
+              className="rail-control absolute right-0 top-1/2 -translate-y-1/2 z-10 h-9 w-9 bg-background/90 border border-primary/35 shadow-lg flex items-center justify-center hover:text-gold active:scale-[0.95] transition"
             >
               <ChevronRight className="h-5 w-5" />
             </button>
