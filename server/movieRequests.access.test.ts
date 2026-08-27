@@ -27,6 +27,8 @@ describe("movieRequests access", () => {
     await expect(caller.movieRequests.submit({ title: "Bot title", website: "https://bot.invalid" })).resolves.toEqual({
       accepted: true,
       duplicate: false,
+      resolution: "queued",
+      matches: [],
     });
   });
 

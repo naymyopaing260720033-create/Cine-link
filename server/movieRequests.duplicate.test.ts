@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { collection, FakeMongoClient, FakeObjectId } = vi.hoisted(() => {
+const { collection, catalogCollection, FakeMongoClient, FakeObjectId } = vi.hoisted(() => {
   const collection = {
     createIndex: vi.fn().mockResolvedValue("index"),
     findOneAndUpdate: vi.fn(),
     insertOne: vi.fn(),
     updateOne: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
+    find: vi.fn(),
+  };
+  const catalogCollection = {
     find: vi.fn(),
   };
 
@@ -21,16 +24,16 @@ const { collection, FakeMongoClient, FakeObjectId } = vi.hoisted(() => {
 
   class FakeMongoClient {
     db() {
-      return { collection: () => collection };
+      return { collection: (name: string) => name === "catalog" ? catalogCollection : collection };
     }
   }
 
-  return { collection, FakeMongoClient, FakeObjectId };
+  return { collection, catalogCollection, FakeMongoClient, FakeObjectId };
 });
 
 vi.mock("mongodb", () => ({ MongoClient: FakeMongoClient, ObjectId: FakeObjectId }));
 
-import { hashBrowserRequestToken, listVisitorMovieRequests, submitMovieRequest } from "./movieRequests";
+import { findAvailableCatalogMatches, hashBrowserRequestToken, listVisitorMovieRequests, submitMovieRequest } from "./movieRequests";
 
 describe("movie request duplicates", () => {
   beforeEach(() => {
@@ -103,5 +106,22 @@ describe("movie request duplicates", () => {
     expect(records).toEqual([expect.objectContaining({ id: "507f1f77bcf86cd799439013", status: "available", description: "Myanmar subtitle" })]);
     expect(records[0]).not.toHaveProperty("adminNote");
     expect(records[0]).not.toHaveProperty("notificationStatus");
+  });
+
+  it("finds exact published catalog titles without exposing delivery identifiers", async () => {
+    catalogCollection.find.mockReturnValue({
+      limit: () => ({
+        toArray: async () => [
+          { kind: "movie", tmdbId: 27205, title: "Inception", posterPath: "/inception.jpg", releaseDate: "2010-07-15", status: "published", contentKey: "private" },
+          { kind: "movie", tmdbId: 9, title: "Inception: Similar", status: "published" },
+        ],
+      }),
+    });
+
+    const matches = await findAvailableCatalogMatches("movie", "  inception! (2010) ");
+
+    expect(catalogCollection.find).toHaveBeenCalledWith(expect.objectContaining({ kind: "movie", status: "published" }));
+    expect(matches).toEqual([{ kind: "movie", tmdbId: 27205, title: "Inception", posterPath: "/inception.jpg", releaseDate: "2010-07-15" }]);
+    expect(matches[0]).not.toHaveProperty("contentKey");
   });
 });

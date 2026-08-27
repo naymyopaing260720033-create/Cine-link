@@ -4,7 +4,7 @@
  * exposes Telegram or database credentials to the browser.
  */
 import { FormEvent, useState } from "react";
-import { Film, Loader2, Send, Tv } from "lucide-react";
+import { ArrowRight, Film, Loader2, Send, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { getOrCreateBrowserRequestToken } from "@/lib/requestHistory";
+import { posterUrl } from "@/lib/tmdb";
 import { trpc } from "@/lib/trpc";
 
 type MovieRequestFormProps = {
@@ -28,6 +29,7 @@ const REQUEST_COOLDOWN_KEY = "cinelink:movie-request:last-submitted-at";
 const REQUEST_COOLDOWN_MS = 60_000;
 
 type RequestType = "movie" | "series";
+type AvailableCatalogMatch = { kind: RequestType; tmdbId: number; title: string; posterPath: string | null; releaseDate: string | null };
 
 const requestTypeCopy: Record<RequestType, { label: string; singular: string }> = {
   movie: { label: "ရုပ်ရှင် (Movie)", singular: "ရုပ်ရှင်" },
@@ -40,23 +42,34 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [availableMatches, setAvailableMatches] = useState<AvailableCatalogMatch[]>([]);
   const submitRequest = trpc.movieRequests.submit.useMutation({
     onSuccess: (result) => {
+      if (result.resolution === "available") {
+        setAvailableMatches(result.matches);
+        setFeedback("တောင်းဆိုထားသော ဇာတ်ကားသည် CineLink တွင်ရှိပြီးသားဖြစ်ပါသည်။ အောက်မှရွေးပြီးကြည့်နိုင်ပါသည်။");
+        return;
+      }
       window.localStorage.setItem(REQUEST_COOLDOWN_KEY, String(Date.now()));
       setTitle("");
       setDescription("");
+      setAvailableMatches([]);
       setFeedback(
         result.duplicate
           ? `ဤ ${requestTypeCopy[requestType].singular} သည် request list တွင်ရှိပြီးသားဖြစ်၍ demand count ကို update လုပ်ပြီးပါပြီ။`
           : `${requestTypeCopy[requestType].singular} request ကို CineLink သို့ပို့ပြီးပါပြီ။`,
       );
     },
-    onError: (error) => setFeedback(error.message),
+    onError: (error) => {
+      setAvailableMatches([]);
+      setFeedback(error.message);
+    },
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFeedback(null);
+    setAvailableMatches([]);
     const trimmedTitle = title.trim();
     if (trimmedTitle.length < 2) {
       setFeedback("ဇာတ်ကားအမည်ကို အနည်းဆုံး စာလုံး ၂ လုံးဖြင့်ထည့်ပေးပါ။");
@@ -90,7 +103,11 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
         <form onSubmit={handleSubmit} className="space-y-5 px-5 pb-6 sm:px-6">
           <RadioGroup
             value={requestType}
-            onValueChange={(value) => setRequestType(value as RequestType)}
+            onValueChange={(value) => {
+              setRequestType(value as RequestType);
+              setAvailableMatches([]);
+              setFeedback(null);
+            }}
             className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"
             aria-label="Request type"
             disabled={submitRequest.isPending}
@@ -113,7 +130,10 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
             <Input
               id="request-title"
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                setAvailableMatches([]);
+              }}
               maxLength={180}
               required
               placeholder={requestType === "movie" ? "ဥပမာ — Inception (2010)" : "ဥပမာ — Dark Season 3"}
@@ -145,6 +165,23 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
           />
           <p className="text-xs leading-relaxed text-muted-foreground">Request အသစ်တစ်ခုကို private CineLink request queue သို့သာပို့ပါမည်။ ထပ်တူ request များသည် demand count ကိုသာတိုးပေးပါမည်။</p>
           {feedback ? <p role="status" className="rounded-lg border border-primary/25 bg-primary/10 px-3 py-2.5 text-sm font-medium leading-relaxed text-foreground">{feedback} <a href="/requests" className="ml-1 font-bold text-primary underline underline-offset-2 hover:text-gold">မိမိတောင်းဆိုမှုများ</a></p> : null}
+          {availableMatches.length ? (
+            <div className="space-y-2 rounded-xl border border-emerald-400/30 bg-emerald-400/5 p-3">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-300">CineLink တွင်ရရှိနိုင်သော title</p>
+              {availableMatches.map((match) => (
+                <a key={`${match.kind}-${match.tmdbId}`} href={match.kind === "movie" ? `/movie/${match.tmdbId}` : `/tv/${match.tmdbId}`} onClick={() => onOpenChange(false)} className="group flex items-center gap-3 rounded-lg border border-border/70 bg-background/55 p-2.5 transition-colors hover:border-primary/60 hover:bg-accent">
+                  <div className="h-14 w-10 shrink-0 overflow-hidden rounded border border-border bg-secondary">
+                    {match.posterPath ? <img src={posterUrl(match.posterPath, "w342") || ""} alt="" className="h-full w-full object-cover" /> : <div className="h-full w-full bg-secondary" />}
+                  </div>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-foreground">{match.title}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">{match.kind === "movie" ? "Movie" : "Series"}{match.releaseDate ? ` · ${match.releaseDate.slice(0, 4)}` : ""}</span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-0.5" />
+                </a>
+              ))}
+            </div>
+          ) : null}
           <Button type="submit" disabled={submitRequest.isPending} className="marquee-chip teal-cta-glow h-11 w-full bg-primary text-base font-bold text-primary-foreground active:scale-[0.97]">
             {submitRequest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             တောင်းဆိုမည်

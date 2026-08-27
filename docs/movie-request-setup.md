@@ -6,6 +6,8 @@ CineLink visitors can submit a **Movie** or **Series** request from the public R
 
 When a title is new, CineLink creates one MongoDB document and posts a plain-text notification to the private **CineLink Requests** Telegram channel. Duplicate matching is separated by request type, so a Movie and a Series with the same title remain distinct. When a visitor requests an existing `new` or `searching` title of the same type again, CineLink increases its `requestCount` and `lastRequestedAt` only. It intentionally does not send a second Telegram notification.
 
+Before creating any request, CineLink checks the already published private delivery `catalog` for an **exact normalized title** of the selected type. When it finds a match, the request modal shows the available Movie or Series card and does not create a `movie_requests` document or send a Telegram queue notification. A catalog title that only looks similar is not treated as a match; the request proceeds to moderation instead.
+
 > The Requests channel is an operational queue only. It does not trigger the Movies/Series auto-publishing bot flow and it must not be added to the Movies or Series ingest allowlist.
 
 ## Admin workflow

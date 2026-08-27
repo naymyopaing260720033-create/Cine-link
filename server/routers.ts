@@ -15,6 +15,7 @@ import {
   MovieRequestDeliveryError,
   MovieRequestInputError,
   deleteMovieRequest,
+  findAvailableCatalogMatches,
   listVisitorMovieRequests,
   listMovieRequests,
   submitMovieRequest,
@@ -168,10 +169,14 @@ export const appRouter = router({
   movieRequests: router({
     /** Public and anonymous: Movie/Series title with optional details, never visitor contact data. */
     submit: publicProcedure.input(movieRequestSubmissionInput).mutation(async ({ input }) => {
-      if (input.website) return { duplicate: false, accepted: true } as const;
+      if (input.website) return { duplicate: false, accepted: true, resolution: "queued", matches: [] } as const;
       try {
+        const matches = await findAvailableCatalogMatches(input.type, input.title);
+        if (matches.length) {
+          return { duplicate: false, accepted: false, resolution: "available", matches } as const;
+        }
         const result = await submitMovieRequest(input.title, input.type, input.description, input.browserToken);
-        return { duplicate: result.duplicate, accepted: true } as const;
+        return { duplicate: result.duplicate, accepted: true, resolution: "queued", matches: [] } as const;
       } catch (error) {
         if (error instanceof MovieRequestInputError) {
           throw new TRPCError({ code: "BAD_REQUEST", message: error.message });

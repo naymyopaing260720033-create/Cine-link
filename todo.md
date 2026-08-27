@@ -337,3 +337,11 @@
 - [x] Replace footer request entry points with a Burmese-first modal opened from the public menu.
 - [x] Preserve duplicate-demand aggregation and admin moderation compatibility for Movie and Series requests.
 - [x] Validate form abuse protection, tests, desktop/mobile UI, and production build.
+
+## Catalog-first Movie and Series Requests
+
+- [x] Inspect available CineLink Movie/Series catalog metadata and title matching fields.
+- [x] Add a safe catalog-first lookup that distinguishes true available matches from similarly named titles.
+- [x] Show existing matching Movie/Series titles in the request modal instead of creating an admin request.
+- [x] Create a request and notify the private queue only when no available catalog title is found.
+- [x] Validate matching, no-match queue behavior, security, tests, and responsive modal presentation.

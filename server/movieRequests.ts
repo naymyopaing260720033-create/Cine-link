@@ -38,6 +38,23 @@ export type VisitorMovieRequestRecord = Pick<
   "id" | "requestedTitle" | "requestType" | "description" | "status" | "createdAt" | "updatedAt" | "lastRequestedAt"
 >;
 
+export type AvailableCatalogMatch = {
+  kind: "movie" | "series";
+  tmdbId: number;
+  title: string;
+  posterPath: string | null;
+  releaseDate: string | null;
+};
+
+type CatalogDocument = {
+  kind: "movie" | "episode";
+  tmdbId: number;
+  title: string;
+  posterPath?: string | null;
+  releaseDate?: string | null;
+  status: "published" | string;
+};
+
 export class MovieRequestInputError extends Error {}
 export class MovieRequestDeliveryError extends Error {}
 
@@ -63,6 +80,22 @@ export function normalizeMovieRequestTitle(value: string) {
     .toLocaleLowerCase("en-US")
     .replace(/[^\w\u1000-\u109f]+/g, " ")
     .trim();
+}
+
+function normalizeCatalogTitle(value: string) {
+  return value
+    .normalize("NFKC")
+    .toLocaleLowerCase("en-US")
+    .replace(/[^\w\u1000-\u109f]+/g, " ")
+    .trim();
+}
+
+function withoutTrailingReleaseYear(value: string) {
+  return value.replace(/\b(?:18|19|20)\d{2}$/, "").trim();
+}
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export function cleanMovieRequestDescription(value: string | null | undefined) {
@@ -115,6 +148,51 @@ async function getMovieRequestCollection(): Promise<Collection<MovieRequestDocum
     indexesReady = true;
   }
   return collection;
+}
+
+/**
+ * Finds published catalog entries only when their normalized title is an exact
+ * match for the visitor's selected Movie or Series request type.
+ */
+export async function findAvailableCatalogMatches(
+  requestType: MovieRequestType,
+  rawTitle: string,
+): Promise<AvailableCatalogMatch[]> {
+  const requestedTitle = cleanMovieRequestTitle(rawTitle);
+  const normalizedTitle = normalizeMovieRequestTitle(requestedTitle);
+  const uri = requiredEnvironment("MONGODB_URI");
+  if (!mongoClient) {
+    mongoClient = new MongoClient(uri, {
+      appName: "CineLinkMovieRequests",
+      serverSelectionTimeoutMS: 6_000,
+    });
+  }
+  const databaseName = process.env.MONGODB_DB_NAME?.trim() || "cinelink";
+  const kind = requestType === "movie" ? "movie" : "episode";
+  const titleLookupTerm = withoutTrailingReleaseYear(normalizedTitle);
+  const candidates = await mongoClient
+    .db(databaseName)
+    .collection<CatalogDocument>("catalog")
+    .find({ kind, status: "published", title: { $regex: escapeRegex(titleLookupTerm).replace(/\s+/g, "\\s+"), $options: "i" } })
+    .limit(30)
+    .toArray();
+
+  const matches = new Map<string, AvailableCatalogMatch>();
+  for (const candidate of candidates) {
+    if (withoutTrailingReleaseYear(normalizeCatalogTitle(candidate.title)) !== titleLookupTerm) continue;
+    const catalogKind = candidate.kind === "movie" ? "movie" : "series";
+    const key = `${catalogKind}:${candidate.tmdbId}`;
+    if (!matches.has(key)) {
+      matches.set(key, {
+        kind: catalogKind,
+        tmdbId: candidate.tmdbId,
+        title: candidate.title,
+        posterPath: candidate.posterPath ?? null,
+        releaseDate: candidate.releaseDate ?? null,
+      });
+    }
+  }
+  return Array.from(matches.values());
 }
 
 function toRecord(document: MovieRequestDocument & { _id: ObjectId }): MovieRequestRecord {
