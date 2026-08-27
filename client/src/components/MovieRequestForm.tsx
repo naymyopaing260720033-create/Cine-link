@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { getOrCreateBrowserRequestToken } from "@/lib/requestHistory";
 import { trpc } from "@/lib/trpc";
 
 type MovieRequestFormProps = {
@@ -73,6 +74,7 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
       title: trimmedTitle,
       type: requestType,
       description: description.trim() || undefined,
+      browserToken: getOrCreateBrowserRequestToken(),
       website,
     });
   };
@@ -82,7 +84,7 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
       <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto border-primary/30 bg-card p-0 sm:max-w-xl">
         <DialogHeader className="border-b border-border px-5 pb-4 pt-5 text-left sm:px-6">
           <p className="detail-kicker">REQUEST THE NEXT SHOW</p>
-          <DialogTitle className="font-display text-2xl font-black text-foreground">ဇာတ်ကား တောင်းဆိုရန်</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-foreground">ဇာတ်ကား တောင်းဆိုရန်</DialogTitle>
           <DialogDescription className="leading-relaxed">Movie သို့မဟုတ် Series ကိုရွေးပြီး အမည်ပေးပို့ပါ။ Account နှင့်အဆက်အသွယ်အချက်အလက် မလိုအပ်ပါ။</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5 px-5 pb-6 sm:px-6">
@@ -142,7 +144,7 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
             onChange={(event) => setWebsite(event.target.value)}
           />
           <p className="text-xs leading-relaxed text-muted-foreground">Request အသစ်တစ်ခုကို private CineLink request queue သို့သာပို့ပါမည်။ ထပ်တူ request များသည် demand count ကိုသာတိုးပေးပါမည်။</p>
-          {feedback ? <p role="status" className="rounded-lg border border-primary/25 bg-primary/10 px-3 py-2.5 text-sm font-medium leading-relaxed text-foreground">{feedback}</p> : null}
+          {feedback ? <p role="status" className="rounded-lg border border-primary/25 bg-primary/10 px-3 py-2.5 text-sm font-medium leading-relaxed text-foreground">{feedback} <a href="/requests" className="ml-1 font-bold text-primary underline underline-offset-2 hover:text-gold">မိမိတောင်းဆိုမှုများ</a></p> : null}
           <Button type="submit" disabled={submitRequest.isPending} className="marquee-chip teal-cta-glow h-11 w-full bg-primary text-base font-bold text-primary-foreground active:scale-[0.97]">
             {submitRequest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             တောင်းဆိုမည်

@@ -23,6 +23,12 @@ Open `/admin`, sign in with the CineLink owner account, and scroll to **Audience
 
 Because requests are anonymous and collect no contact information, **Fulfilled**, **Rejected**, and the optional note are operational responses in the admin queue only. CineLink does not send a direct reply or Telegram message to an individual requester when the status changes.
 
+## Anonymous visitor history
+
+After submitting a request, the same browser can open **My Requests** from the header or submission message to view only its own Movie/Series requests. The browser stores a randomly generated opaque token locally; CineLink stores only a SHA-256 hash of that token alongside the shared request record. The public history response deliberately excludes `adminNote`, Telegram delivery fields, request counts, and all other visitors' records.
+
+The token is browser-specific. Clearing browser storage or opening the site from a different browser/device starts a separate anonymous history, which is the selected privacy trade-off for an account-free request flow.
+
 ## Required deployment configuration
 
 The development environment has validated the current values. Before a Vercel deployment, ensure the same server-only variables exist in **Vercel Project Settings → Environment Variables** for the Production environment.

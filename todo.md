@@ -318,10 +318,17 @@
 
 ## Visitor Request Status Tracking
 
-- [ ] Define a privacy-preserving ownership model so each visitor can only see their own requests.
-- [ ] Add a visitor-facing request list with Pending, Searching, Fulfilled, and Rejected status presentation.
-- [ ] Keep the public navigation limited to Home, Movies, and Series while providing a contextual route to request history.
-- [ ] Validate request ownership, status updates, responsive UI, and production build.
+- [x] Define a privacy-preserving ownership model so each visitor can only see their own requests.
+- [x] Add a visitor-facing request list with Pending, Searching, Fulfilled, and Rejected status presentation.
+- [x] Superseded by the later menu requirement: add contextual Request and My Requests entries while retaining Home, Movies, and Series as the primary browsing categories.
+- [x] Validate request ownership, status updates, responsive UI, and production build.
+
+### Selected Model: Anonymous Browser History
+
+- [x] Generate and retain a per-browser opaque request token without collecting visitor identity or contact data.
+- [x] Save the opaque token only with newly created request records and safely retrieve only matching request history.
+- [x] Add a contextual My Requests history entry and a Burmese-first status page for the current browser.
+- [x] Add automated ownership-isolation and status-display coverage without live Telegram delivery.
 
 ## Menu-triggered Movie and Series Request Modal
 

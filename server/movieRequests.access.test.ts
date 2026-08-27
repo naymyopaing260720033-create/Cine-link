@@ -55,4 +55,11 @@ describe("movieRequests access", () => {
       message: expect.stringContaining("expected string to have >=2 characters"),
     });
   });
+
+  it("rejects a short browser token before loading visitor request history", async () => {
+    const caller = appRouter.createCaller(createContext("user"));
+    await expect(caller.movieRequests.mine({ browserToken: "not-a-valid-browser-token" })).rejects.toMatchObject({
+      message: expect.stringContaining("expected string to have >=32 characters"),
+    });
+  });
 });

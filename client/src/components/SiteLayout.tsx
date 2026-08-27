@@ -5,7 +5,7 @@
  */
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
-import { Search, Send, Menu, X, Heart, Moon, Sun, TicketPlus } from "lucide-react";
+import { Search, Send, Menu, X, Heart, Moon, Sun, TicketPlus, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MovieRequestForm from "@/components/MovieRequestForm";
 import { hasConfiguredTelegramBot, loadConfig } from "@/lib/config";
@@ -75,6 +75,10 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               <TicketPlus className="h-4 w-4" />
               Request
             </button>
+            <Link href="/requests" className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors duration-150 ${location === "/requests" ? "text-gold" : "text-muted-foreground hover:text-gold"}`}>
+              <ClipboardList className="h-4 w-4" />
+              My Requests
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -181,6 +185,10 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 <TicketPlus className="h-4 w-4 text-gold" />
                 Movie / Series တောင်းဆိုရန်
               </button>
+              <Link href="/requests" onClick={() => setOpen(false)} className={`flex items-center gap-2 rounded-md px-2 py-2.5 text-left text-sm font-semibold ${location === "/requests" ? "bg-accent text-gold" : "text-foreground hover:bg-accent"}`}>
+                <ClipboardList className="h-4 w-4 text-gold" />
+                မိမိတောင်းဆိုမှုများ
+              </Link>
               <button
                 type="button"
                 onClick={toggleTheme}

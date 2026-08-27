@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { MongoClient, ObjectId, type Collection } from "mongodb";
 
 export const MOVIE_REQUEST_STATUSES = ["new", "searching", "available", "declined"] as const;
@@ -14,6 +15,8 @@ type MovieRequestDocument = {
   /** Optional for compatibility with movie-only documents created before request types existed. */
   requestType?: MovieRequestType;
   description?: string | null;
+  /** SHA-256 hashes of browser-issued opaque tokens. Raw tokens are never stored. */
+  requesterTokenHashes?: string[];
   status: MovieRequestStatus;
   requestCount: number;
   adminNote: string | null;
@@ -24,11 +27,16 @@ type MovieRequestDocument = {
   lastRequestedAt: Date;
 };
 
-export type MovieRequestRecord = Omit<MovieRequestDocument, "_id" | "requestType" | "description"> & {
+export type MovieRequestRecord = Omit<MovieRequestDocument, "_id" | "requestType" | "description" | "requesterTokenHashes"> & {
   id: string;
   requestType: MovieRequestType;
   description: string | null;
 };
+
+export type VisitorMovieRequestRecord = Pick<
+  MovieRequestRecord,
+  "id" | "requestedTitle" | "requestType" | "description" | "status" | "createdAt" | "updatedAt" | "lastRequestedAt"
+>;
 
 export class MovieRequestInputError extends Error {}
 export class MovieRequestDeliveryError extends Error {}
@@ -65,6 +73,10 @@ export function cleanMovieRequestDescription(value: string | null | undefined) {
   return description;
 }
 
+export function hashBrowserRequestToken(value: string) {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
 export function formatMovieRequestTelegramMessage(
   requestType: MovieRequestType,
   title: string,
@@ -97,6 +109,7 @@ async function getMovieRequestCollection(): Promise<Collection<MovieRequestDocum
   if (!indexesReady) {
     await collection.createIndex({ normalizedTitle: 1, status: 1 });
     await collection.createIndex({ requestType: 1, normalizedTitle: 1, status: 1 });
+    await collection.createIndex({ requesterTokenHashes: 1, lastRequestedAt: -1 });
     await collection.createIndex({ lastRequestedAt: -1 });
     await collection.createIndex({ requestCount: -1, lastRequestedAt: -1 });
     indexesReady = true;
@@ -105,8 +118,13 @@ async function getMovieRequestCollection(): Promise<Collection<MovieRequestDocum
 }
 
 function toRecord(document: MovieRequestDocument & { _id: ObjectId }): MovieRequestRecord {
-  const { _id, requestType = "movie", description = null, ...request } = document;
+  const { _id, requestType = "movie", description = null, requesterTokenHashes: _requesterTokenHashes, ...request } = document;
   return { id: _id.toHexString(), ...request, requestType, description };
+}
+
+function toVisitorRecord(document: MovieRequestDocument & { _id: ObjectId }): VisitorMovieRequestRecord {
+  const { id, requestedTitle, requestType, description, status, createdAt, updatedAt, lastRequestedAt } = toRecord(document);
+  return { id, requestedTitle, requestType, description, status, createdAt, updatedAt, lastRequestedAt };
 }
 
 async function sendNewRequestNotification(
@@ -138,12 +156,19 @@ export async function submitMovieRequest(
   rawTitle: string,
   requestType: MovieRequestType = "movie",
   rawDescription?: string | null,
+  browserRequestToken?: string,
 ) {
   const requestedTitle = cleanMovieRequestTitle(rawTitle);
   const normalizedTitle = normalizeMovieRequestTitle(requestedTitle);
   const description = cleanMovieRequestDescription(rawDescription);
+  const requesterTokenHash = browserRequestToken ? hashBrowserRequestToken(browserRequestToken) : null;
   const collection = await getMovieRequestCollection();
   const now = new Date();
+  const duplicateUpdate = {
+    $inc: { requestCount: 1 },
+    $set: { updatedAt: now, lastRequestedAt: now },
+    ...(requesterTokenHash ? { $addToSet: { requesterTokenHashes: requesterTokenHash } } : {}),
+  };
 
   const existing = await collection.findOneAndUpdate(
     requestType === "movie"
@@ -153,7 +178,7 @@ export async function submitMovieRequest(
           $or: [{ requestType: "movie" }, { requestType: { $exists: false } }],
         }
       : { normalizedTitle, requestType, status: { $in: ["new", "searching"] } },
-    { $inc: { requestCount: 1 }, $set: { updatedAt: now, lastRequestedAt: now } },
+    duplicateUpdate,
     { returnDocument: "after" },
   );
 
@@ -166,6 +191,7 @@ export async function submitMovieRequest(
     normalizedTitle,
     requestType,
     description,
+    requesterTokenHashes: requesterTokenHash ? [requesterTokenHash] : [],
     status: "new",
     requestCount: 1,
     adminNote: null,
@@ -196,6 +222,17 @@ export async function listMovieRequests(status?: MovieRequestStatus) {
   const filter = status ? { status } : {};
   const records = await collection.find(filter).sort({ lastRequestedAt: -1 }).toArray();
   return records.map(toRecord);
+}
+
+/** Returns only non-sensitive fields from requests associated with one browser-local token. */
+export async function listVisitorMovieRequests(browserRequestToken: string) {
+  const collection = await getMovieRequestCollection();
+  const requesterTokenHash = hashBrowserRequestToken(browserRequestToken);
+  const records = await collection
+    .find({ requesterTokenHashes: requesterTokenHash })
+    .sort({ lastRequestedAt: -1 })
+    .toArray();
+  return records.map(toVisitorRecord);
 }
 
 export async function updateMovieRequest(

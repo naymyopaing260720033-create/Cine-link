@@ -6,6 +6,7 @@ const { collection, FakeMongoClient, FakeObjectId } = vi.hoisted(() => {
     findOneAndUpdate: vi.fn(),
     insertOne: vi.fn(),
     updateOne: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
+    find: vi.fn(),
   };
 
   class FakeObjectId {
@@ -29,7 +30,7 @@ const { collection, FakeMongoClient, FakeObjectId } = vi.hoisted(() => {
 
 vi.mock("mongodb", () => ({ MongoClient: FakeMongoClient, ObjectId: FakeObjectId }));
 
-import { submitMovieRequest } from "./movieRequests";
+import { hashBrowserRequestToken, listVisitorMovieRequests, submitMovieRequest } from "./movieRequests";
 
 describe("movie request duplicates", () => {
   beforeEach(() => {
@@ -70,5 +71,37 @@ describe("movie request duplicates", () => {
     expect(collection.findOneAndUpdate).toHaveBeenCalledTimes(2);
     expect(collection.findOneAndUpdate.mock.calls[1]?.[1]).toMatchObject({ $inc: { requestCount: 1 } });
     expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns only non-sensitive request records associated with the calling browser token", async () => {
+    const browserToken = "local-browser-token-for-request-history-0001";
+    const now = new Date("2026-08-28T00:00:00.000Z");
+    collection.find.mockReturnValue({
+      sort: () => ({
+        toArray: async () => [{
+          _id: new FakeObjectId("507f1f77bcf86cd799439013"),
+          requestedTitle: "Inception",
+          normalizedTitle: "inception",
+          requestType: "movie",
+          description: "Myanmar subtitle",
+          requesterTokenHashes: [hashBrowserRequestToken(browserToken)],
+          status: "available",
+          requestCount: 4,
+          adminNote: "Internal delivery note",
+          notificationStatus: "sent",
+          telegramNotificationSentAt: now,
+          createdAt: now,
+          updatedAt: now,
+          lastRequestedAt: now,
+        }],
+      }),
+    });
+
+    const records = await listVisitorMovieRequests(browserToken);
+
+    expect(collection.find).toHaveBeenCalledWith({ requesterTokenHashes: hashBrowserRequestToken(browserToken) });
+    expect(records).toEqual([expect.objectContaining({ id: "507f1f77bcf86cd799439013", status: "available", description: "Myanmar subtitle" })]);
+    expect(records[0]).not.toHaveProperty("adminNote");
+    expect(records[0]).not.toHaveProperty("notificationStatus");
   });
 });

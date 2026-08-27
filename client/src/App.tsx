@@ -12,6 +12,7 @@ import Admin from "./pages/Admin";
 import TvDetail from "./pages/TvDetail";
 import Favorites from "./pages/Favorites";
 import ColorDirections from "./pages/ColorDirections";
+import Requests from "./pages/Requests";
 import { FavoritesProvider } from "./hooks/useFavorites";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       <Route path={"/genre/:id"} component={GenrePage} />
       <Route path={"/tv/:id"} component={TvDetail} />
       <Route path={"/favorites"} component={Favorites} />
+      <Route path={"/requests"} component={Requests} />
       <Route path={"/admin"} component={Admin} />
       <Route path={"/_color-directions"} component={ColorDirections} />
       <Route path={"/404"} component={NotFound} />

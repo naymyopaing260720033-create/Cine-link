@@ -15,6 +15,7 @@ import {
   MovieRequestDeliveryError,
   MovieRequestInputError,
   deleteMovieRequest,
+  listVisitorMovieRequests,
   listMovieRequests,
   submitMovieRequest,
   updateMovieRequest,
@@ -60,6 +61,8 @@ const movieRequestSubmissionInput = z.object({
   title: z.string().trim().min(2).max(180),
   type: z.enum(MOVIE_REQUEST_TYPES).default("movie"),
   description: z.string().trim().max(600).optional(),
+  /** Opaque browser-local token used only to retrieve this browser's anonymous history. */
+  browserToken: z.string().min(32).max(128).optional(),
   /** Hidden browser-only honeypot; values are accepted without sending a message. */
   website: z.string().max(256).optional(),
 });
@@ -167,7 +170,7 @@ export const appRouter = router({
     submit: publicProcedure.input(movieRequestSubmissionInput).mutation(async ({ input }) => {
       if (input.website) return { duplicate: false, accepted: true } as const;
       try {
-        const result = await submitMovieRequest(input.title, input.type, input.description);
+        const result = await submitMovieRequest(input.title, input.type, input.description, input.browserToken);
         return { duplicate: result.duplicate, accepted: true } as const;
       } catch (error) {
         if (error instanceof MovieRequestInputError) {
@@ -183,6 +186,9 @@ export const appRouter = router({
     list: adminProcedure
       .input(z.object({ status: movieRequestStatusInput.optional() }).optional())
       .query(({ input }) => listMovieRequests(input?.status)),
+    mine: publicProcedure
+      .input(z.object({ browserToken: z.string().min(32).max(128) }))
+      .query(({ input }) => listVisitorMovieRequests(input.browserToken)),
     update: adminProcedure
       .input(
         z.object({
