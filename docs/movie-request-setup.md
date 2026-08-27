@@ -45,3 +45,7 @@ After adding or changing an environment variable in Vercel, redeploy the project
 The public form limits names to 2–180 characters, has a 60-second browser-side cooldown, and includes a hidden honeypot field. The server requires a valid title, keeps all MongoDB and Telegram credentials server-side, and restricts the request list/update/delete procedures to authenticated admins.
 
 Movie posters, video files, and visitor-identifying information are not stored in the MongoDB request documents.
+
+## Live submission verification
+
+On 2026-08-27, the public Home request form submitted a new title and received an `accepted: true`, `duplicate: false` response from the CineLink server. The request was intentionally sent only after operator confirmation. A read-only MongoDB verification confirmed the record exists with `requestCount: 1`, `notificationStatus: sent`, and a Telegram notification timestamp. The test request is visible in the authenticated Admin Editor queue and may be deleted there after review.

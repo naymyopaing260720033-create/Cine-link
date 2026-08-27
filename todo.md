@@ -307,4 +307,4 @@
 - [x] Test validation, duplicate behavior, admin authorization, notification payloads, UI states, and production build.
 - [x] Add automated duplicate-request coverage for MongoDB demand aggregation and one-time Telegram notification behavior.
 - [x] Repair the duplicate-request test mock so the new coverage can run successfully.
-- [ ] Perform an operator-approved live website submission to verify one private Telegram Requests channel notification.
+- [x] Perform an operator-approved live website submission to verify one private Telegram Requests channel notification.
