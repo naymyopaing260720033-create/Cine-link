@@ -4,7 +4,7 @@
  * Amber remains the count and editorial signal so the dashboard stays cinema-first.
  */
 import { useState } from "react";
-import { CheckCircle2, CircleX, ClipboardList, Loader2, Save, SearchCheck, Trash2 } from "lucide-react";
+import { CheckCircle2, CircleX, ClipboardList, Film, Loader2, Save, SearchCheck, Trash2, Tv } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,9 +72,9 @@ export default function MovieRequestModerationPanel() {
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="detail-kicker">Audience requests</p>
-          <h2 className="mt-1 font-display text-2xl font-bold">Movie Requests</h2>
+          <h2 className="mt-1 font-display text-2xl font-bold">Movie & Series Requests</h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Anonymous title requests are stored in MongoDB. New titles are sent once to the private CineLink Requests channel; repeat requests only increase demand.
+            Anonymous Movie/Series requests are stored in MongoDB. New titles are sent once to the private CineLink Requests channel; repeat requests only increase demand.
           </p>
         </div>
         <span className="marquee-count text-sm text-gold">{requests.length} shown</span>
@@ -119,10 +119,12 @@ export default function MovieRequestModerationPanel() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="marquee-count text-xs text-gold">{request.requestCount} request{request.requestCount === 1 ? "" : "s"}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-border bg-background/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{request.requestType === "series" ? <Tv className="h-3 w-3 text-primary" /> : <Film className="h-3 w-3 text-gold" />}{request.requestType}</span>
                       <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] ${statusStyles[request.status]}`}>{statusLabels[request.status]}</span>
                       <h3 className="font-display text-lg font-bold">{request.requestedTitle}</h3>
                     </div>
                     <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><SearchCheck className="h-3.5 w-3.5 text-primary" /> Last requested {new Date(request.lastRequestedAt).toLocaleString()}</p>
+                    {request.description ? <p className="mt-2 max-w-2xl rounded-lg border border-border/70 bg-background/45 px-3 py-2 text-sm leading-relaxed text-muted-foreground">{request.description}</p> : null}
                   </div>
                   <div className="flex min-w-[12rem] flex-col gap-2 sm:flex-row lg:w-[29rem]">
                     <select

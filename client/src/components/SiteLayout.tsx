@@ -5,8 +5,9 @@
  */
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
-import { Search, Send, Menu, X, Heart, Moon, Sun } from "lucide-react";
+import { Search, Send, Menu, X, Heart, Moon, Sun, TicketPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MovieRequestForm from "@/components/MovieRequestForm";
 import { hasConfiguredTelegramBot, loadConfig } from "@/lib/config";
 import { toast } from "sonner";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -17,6 +18,7 @@ const LOGO = "/manus-storage/cinelink-logo_12bdb54e.png";
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [open, setOpen] = useState(false);
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const cfg = loadConfig();
   const telegramReady = hasConfiguredTelegramBot(cfg.telegramBotUsername);
   const { favorites } = useFavorites();
@@ -65,6 +67,14 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 {item.label}
               </Link>
             ))}
+            <button
+              type="button"
+              onClick={() => setRequestDialogOpen(true)}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-gold"
+            >
+              <TicketPlus className="h-4 w-4" />
+              Request
+            </button>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -162,6 +172,17 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               ))}
               <button
                 type="button"
+                onClick={() => {
+                  setOpen(false);
+                  setRequestDialogOpen(true);
+                }}
+                className="flex items-center gap-2 rounded-md px-2 py-2.5 text-left text-sm font-semibold text-foreground hover:bg-accent"
+              >
+                <TicketPlus className="h-4 w-4 text-gold" />
+                Movie / Series တောင်းဆိုရန်
+              </button>
+              <button
+                type="button"
                 onClick={toggleTheme}
                 aria-pressed={theme === "light"}
                 className="flex items-center gap-2 rounded-md px-2 py-2.5 text-left text-sm font-medium text-foreground hover:bg-accent"
@@ -184,6 +205,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </div>
         )}
       </header>
+
+      <MovieRequestForm open={requestDialogOpen} onOpenChange={setRequestDialogOpen} />
 
       <main className="flex-1 pt-16">{children}</main>
 

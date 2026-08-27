@@ -1,33 +1,53 @@
 /*
- * CINE LINK — public, name-only movie request form.
- * MIDNIGHT TEAL & EMERALD: a compact ticket-like request prompt that never
+ * CINE LINK — public Movie/Series request modal.
+ * MIDNIGHT TEAL & EMERALD: a ticket-like request prompt that never
  * exposes Telegram or database credentials to the browser.
  */
 import { FormEvent, useState } from "react";
-import { Loader2, Send } from "lucide-react";
+import { Film, Loader2, Send, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 
 type MovieRequestFormProps = {
-  variant?: "footer" | "inline";
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 };
 
 const REQUEST_COOLDOWN_KEY = "cinelink:movie-request:last-submitted-at";
 const REQUEST_COOLDOWN_MS = 60_000;
 
-export default function MovieRequestForm({ variant = "footer" }: MovieRequestFormProps) {
+type RequestType = "movie" | "series";
+
+const requestTypeCopy: Record<RequestType, { label: string; singular: string }> = {
+  movie: { label: "ရုပ်ရှင် (Movie)", singular: "ရုပ်ရှင်" },
+  series: { label: "စီးရီး (Series)", singular: "စီးရီး" },
+};
+
+export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFormProps) {
+  const [requestType, setRequestType] = useState<RequestType>("movie");
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [website, setWebsite] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
   const submitRequest = trpc.movieRequests.submit.useMutation({
     onSuccess: (result) => {
       window.localStorage.setItem(REQUEST_COOLDOWN_KEY, String(Date.now()));
       setTitle("");
+      setDescription("");
       setFeedback(
         result.duplicate
-          ? "This title is already on our request list. We updated its demand count."
-          : "Your movie request has been sent to CineLink.",
+          ? `ဤ ${requestTypeCopy[requestType].singular} သည် request list တွင်ရှိပြီးသားဖြစ်၍ demand count ကို update လုပ်ပြီးပါပြီ။`
+          : `${requestTypeCopy[requestType].singular} request ကို CineLink သို့ပို့ပြီးပါပြီ။`,
       );
     },
     onError: (error) => setFeedback(error.message),
@@ -38,71 +58,97 @@ export default function MovieRequestForm({ variant = "footer" }: MovieRequestFor
     setFeedback(null);
     const trimmedTitle = title.trim();
     if (trimmedTitle.length < 2) {
-      setFeedback("Please enter a movie name with at least 2 characters.");
+      setFeedback("ဇာတ်ကားအမည်ကို အနည်းဆုံး စာလုံး ၂ လုံးဖြင့်ထည့်ပေးပါ။");
       return;
     }
 
     const lastSubmittedAt = Number(window.localStorage.getItem(REQUEST_COOLDOWN_KEY) || 0);
     const remainingSeconds = Math.ceil((REQUEST_COOLDOWN_MS - (Date.now() - lastSubmittedAt)) / 1000);
     if (remainingSeconds > 0) {
-      setFeedback(`Please wait ${remainingSeconds} seconds before sending another request.`);
+      setFeedback(`နောက် request တစ်ခုမပို့မီ ${remainingSeconds} စက္ကန့်စောင့်ပေးပါ။`);
       return;
     }
 
-    submitRequest.mutate({ title: trimmedTitle, website });
+    submitRequest.mutate({
+      title: trimmedTitle,
+      type: requestType,
+      description: description.trim() || undefined,
+      website,
+    });
   };
 
-  const isFooter = variant === "footer";
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={
-        isFooter
-          ? "marquee-request-panel w-full max-w-xl rounded-2xl border border-primary/25 bg-background/45 p-4 shadow-[0_18px_48px_rgba(0,0,0,0.18)]"
-          : "marquee-request-panel mt-5 max-w-xl rounded-xl border border-primary/20 bg-card/60 p-4"
-      }
-    >
-      <p className="detail-kicker">REQUEST THE NEXT SHOW</p>
-      <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-end">
-        <label className="min-w-0 flex-1 text-sm font-semibold text-foreground" htmlFor={`movie-request-${variant}`}>
-          Movie name
-          <Input
-            id={`movie-request-${variant}`}
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            maxLength={180}
-            required
-            placeholder="e.g. Inception"
-            className="mt-2 h-10 bg-background/70 text-foreground placeholder:text-muted-foreground"
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[calc(100svh-2rem)] overflow-y-auto border-primary/30 bg-card p-0 sm:max-w-xl">
+        <DialogHeader className="border-b border-border px-5 pb-4 pt-5 text-left sm:px-6">
+          <p className="detail-kicker">REQUEST THE NEXT SHOW</p>
+          <DialogTitle className="font-display text-2xl font-black text-foreground">ဇာတ်ကား တောင်းဆိုရန်</DialogTitle>
+          <DialogDescription className="leading-relaxed">Movie သို့မဟုတ် Series ကိုရွေးပြီး အမည်ပေးပို့ပါ။ Account နှင့်အဆက်အသွယ်အချက်အလက် မလိုအပ်ပါ။</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-5 px-5 pb-6 sm:px-6">
+          <RadioGroup
+            value={requestType}
+            onValueChange={(value) => setRequestType(value as RequestType)}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"
+            aria-label="Request type"
             disabled={submitRequest.isPending}
+          >
+            {(["movie", "series"] as const).map((type) => {
+              const selected = requestType === type;
+              const Icon = type === "movie" ? Film : Tv;
+              return (
+                <label key={type} className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors ${selected ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background/45 text-muted-foreground hover:border-primary/55"}`}>
+                  <RadioGroupItem value={type} aria-label={requestTypeCopy[type].label} />
+                  <Icon className={`h-5 w-5 ${selected ? "text-primary" : "text-gold"}`} />
+                  <span className="font-semibold">{requestTypeCopy[type].label}</span>
+                </label>
+              );
+            })}
+          </RadioGroup>
+
+          <label className="block text-sm font-semibold text-foreground" htmlFor="request-title">
+            ဇာတ်ကားအမည် <span className="text-destructive">*</span>
+            <Input
+              id="request-title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              maxLength={180}
+              required
+              placeholder={requestType === "movie" ? "ဥပမာ — Inception (2010)" : "ဥပမာ — Dark Season 3"}
+              className="mt-2 h-11 bg-background/70 text-base text-foreground placeholder:text-muted-foreground"
+              disabled={submitRequest.isPending}
+            />
+          </label>
+
+          <label className="block text-sm font-semibold text-foreground" htmlFor="request-description">
+            အခြားအချက်အလက် <span className="font-normal text-muted-foreground">(မထည့်လည်းရ)</span>
+            <Textarea
+              id="request-description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              maxLength={600}
+              placeholder="ဥပမာ — မြန်မာစာတန်းထိုး/မြန်မာအသံထွက်၊ season/episode စသည်ဖြင့်ရေးနိုင်ပါသည်။"
+              className="mt-2 min-h-28 resize-y bg-background/70 text-base text-foreground placeholder:text-muted-foreground"
+              disabled={submitRequest.isPending}
+            />
+          </label>
+          <input
+            aria-hidden="true"
+            autoComplete="off"
+            className="pointer-events-none absolute -left-[10000px] top-auto h-px w-px opacity-0"
+            name="website"
+            tabIndex={-1}
+            value={website}
+            onChange={(event) => setWebsite(event.target.value)}
           />
-        </label>
-        <Button
-          type="submit"
-          disabled={submitRequest.isPending}
-          className="marquee-chip teal-cta-glow h-10 shrink-0 bg-primary px-4 font-semibold text-primary-foreground active:scale-[0.97]"
-        >
-          {submitRequest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          Send request
-        </Button>
-      </div>
-      <input
-        aria-hidden="true"
-        autoComplete="off"
-        className="pointer-events-none absolute -left-[10000px] top-auto h-px w-px opacity-0"
-        name="website"
-        tabIndex={-1}
-        value={website}
-        onChange={(event) => setWebsite(event.target.value)}
-      />
-      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-        Just the title is enough. CineLink will review your request; no account or contact details are needed.
-      </p>
-      {feedback ? (
-        <p role="status" className="mt-3 rounded-md border border-primary/25 bg-primary/10 px-3 py-2 text-xs font-medium leading-relaxed text-foreground">
-          {feedback}
-        </p>
-      ) : null}
-    </form>
+          <p className="text-xs leading-relaxed text-muted-foreground">Request အသစ်တစ်ခုကို private CineLink request queue သို့သာပို့ပါမည်။ ထပ်တူ request များသည် demand count ကိုသာတိုးပေးပါမည်။</p>
+          {feedback ? <p role="status" className="rounded-lg border border-primary/25 bg-primary/10 px-3 py-2.5 text-sm font-medium leading-relaxed text-foreground">{feedback}</p> : null}
+          <Button type="submit" disabled={submitRequest.isPending} className="marquee-chip teal-cta-glow h-11 w-full bg-primary text-base font-bold text-primary-foreground active:scale-[0.97]">
+            {submitRequest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            တောင်းဆိုမည်
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

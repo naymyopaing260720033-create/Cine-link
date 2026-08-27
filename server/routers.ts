@@ -11,6 +11,7 @@ import {
 } from "./db";
 import {
   MOVIE_REQUEST_STATUSES,
+  MOVIE_REQUEST_TYPES,
   MovieRequestDeliveryError,
   MovieRequestInputError,
   deleteMovieRequest,
@@ -57,6 +58,8 @@ const imageInput = z.object({
 const movieRequestStatusInput = z.enum(MOVIE_REQUEST_STATUSES);
 const movieRequestSubmissionInput = z.object({
   title: z.string().trim().min(2).max(180),
+  type: z.enum(MOVIE_REQUEST_TYPES).default("movie"),
+  description: z.string().trim().max(600).optional(),
   /** Hidden browser-only honeypot; values are accepted without sending a message. */
   website: z.string().max(256).optional(),
 });
@@ -160,11 +163,11 @@ export const appRouter = router({
       }),
   }),
   movieRequests: router({
-    /** Public and anonymous: only a movie name is accepted. */
+    /** Public and anonymous: Movie/Series title with optional details, never visitor contact data. */
     submit: publicProcedure.input(movieRequestSubmissionInput).mutation(async ({ input }) => {
       if (input.website) return { duplicate: false, accepted: true } as const;
       try {
-        const result = await submitMovieRequest(input.title);
+        const result = await submitMovieRequest(input.title, input.type, input.description);
         return { duplicate: result.duplicate, accepted: true } as const;
       } catch (error) {
         if (error instanceof MovieRequestInputError) {

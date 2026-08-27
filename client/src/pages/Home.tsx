@@ -16,7 +16,6 @@ import HorizontalRail, {
   toRailSeries,
   type RailItem,
 } from "@/components/HorizontalRail";
-import MovieRequestForm from "@/components/MovieRequestForm";
 import {
   getTrending,
   getPopular,
@@ -345,7 +344,7 @@ export default function Home() {
 
       {/* ── Bot footer CTA ───────────────────────────────────── */}
       <section className="telegram-marquee border-t border-border bg-card/60">
-        <div className="container grid gap-6 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.8fr)] lg:items-center">
+        <div className="container py-10">
           <div>
             <p className="font-display font-bold text-lg text-foreground">
               Tonight&apos;s feature, delivered via Telegram
@@ -361,7 +360,6 @@ export default function Home() {
               )}
             </div>
           </div>
-          <MovieRequestForm variant="footer" />
         </div>
       </section>
     </SiteLayout>

@@ -315,3 +315,18 @@
 - [x] Add one-click Fulfilled and Rejected actions with distinct visual states.
 - [x] Preserve optional admin notes and show updated completion/rejection status in the request list.
 - [x] Validate admin-only persistence, responsive controls, tests, and production build.
+
+## Visitor Request Status Tracking
+
+- [ ] Define a privacy-preserving ownership model so each visitor can only see their own requests.
+- [ ] Add a visitor-facing request list with Pending, Searching, Fulfilled, and Rejected status presentation.
+- [ ] Keep the public navigation limited to Home, Movies, and Series while providing a contextual route to request history.
+- [ ] Validate request ownership, status updates, responsive UI, and production build.
+
+## Menu-triggered Movie and Series Request Modal
+
+- [x] Review the reference modal layout and identify compatible CineLink menu entry points.
+- [x] Add validated Movie/Series request type and optional request description to the server-only request model.
+- [x] Replace footer request entry points with a Burmese-first modal opened from the public menu.
+- [x] Preserve duplicate-demand aggregation and admin moderation compatibility for Movie and Series requests.
+- [x] Validate form abuse protection, tests, desktop/mobile UI, and production build.

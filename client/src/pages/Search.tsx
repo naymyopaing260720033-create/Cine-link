@@ -12,7 +12,6 @@ import SiteLayout from "@/components/SiteLayout";
 import ApiKeyBanner, { useApiKeyMissing } from "@/components/ApiKeyBanner";
 import MovieCard from "@/components/MovieCard";
 import MarqueeSkeleton from "@/components/MarqueeSkeleton";
-import MovieRequestForm from "@/components/MovieRequestForm";
 import SeriesCard from "@/components/SeriesCard";
 import {
   searchMovies,
@@ -151,7 +150,6 @@ export default function Search() {
             </Button>
           ))}
         </div>
-        <MovieRequestForm variant="inline" />
       </section>
 
       {noKey && (

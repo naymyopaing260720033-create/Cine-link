@@ -2,6 +2,8 @@ import { MongoClient, ObjectId, type Collection } from "mongodb";
 
 export const MOVIE_REQUEST_STATUSES = ["new", "searching", "available", "declined"] as const;
 export type MovieRequestStatus = (typeof MOVIE_REQUEST_STATUSES)[number];
+export const MOVIE_REQUEST_TYPES = ["movie", "series"] as const;
+export type MovieRequestType = (typeof MOVIE_REQUEST_TYPES)[number];
 
 type NotificationStatus = "sent" | "failed";
 
@@ -9,6 +11,9 @@ type MovieRequestDocument = {
   _id?: ObjectId;
   requestedTitle: string;
   normalizedTitle: string;
+  /** Optional for compatibility with movie-only documents created before request types existed. */
+  requestType?: MovieRequestType;
+  description?: string | null;
   status: MovieRequestStatus;
   requestCount: number;
   adminNote: string | null;
@@ -19,7 +24,11 @@ type MovieRequestDocument = {
   lastRequestedAt: Date;
 };
 
-export type MovieRequestRecord = Omit<MovieRequestDocument, "_id"> & { id: string };
+export type MovieRequestRecord = Omit<MovieRequestDocument, "_id" | "requestType" | "description"> & {
+  id: string;
+  requestType: MovieRequestType;
+  description: string | null;
+};
 
 export class MovieRequestInputError extends Error {}
 export class MovieRequestDeliveryError extends Error {}
@@ -48,15 +57,30 @@ export function normalizeMovieRequestTitle(value: string) {
     .trim();
 }
 
-export function formatMovieRequestTelegramMessage(title: string, requestCount: number, receivedAt: Date) {
+export function cleanMovieRequestDescription(value: string | null | undefined) {
+  const description = value?.replace(/\s+/g, " ").replace(/[\u0000-\u001F\u007F]/g, "").trim() || null;
+  if (description && description.length > 600) {
+    throw new MovieRequestInputError("Request details must be 600 characters or fewer.");
+  }
+  return description;
+}
+
+export function formatMovieRequestTelegramMessage(
+  requestType: MovieRequestType,
+  title: string,
+  description: string | null,
+  requestCount: number,
+  receivedAt: Date,
+) {
   return [
-    "NEW MOVIE REQUEST",
+    `NEW ${requestType === "series" ? "SERIES" : "MOVIE"} REQUEST`,
     "",
     `Title: ${title}`,
+    description ? `Details: ${description}` : null,
     `Requests: ${requestCount}`,
     "Source: CineLink website",
     `Received: ${receivedAt.toISOString()}`,
-  ].join("\n");
+  ].filter((line): line is string => line !== null).join("\n");
 }
 
 async function getMovieRequestCollection(): Promise<Collection<MovieRequestDocument>> {
@@ -72,6 +96,7 @@ async function getMovieRequestCollection(): Promise<Collection<MovieRequestDocum
   const collection = mongoClient.db(databaseName).collection<MovieRequestDocument>("movie_requests");
   if (!indexesReady) {
     await collection.createIndex({ normalizedTitle: 1, status: 1 });
+    await collection.createIndex({ requestType: 1, normalizedTitle: 1, status: 1 });
     await collection.createIndex({ lastRequestedAt: -1 });
     await collection.createIndex({ requestCount: -1, lastRequestedAt: -1 });
     indexesReady = true;
@@ -80,11 +105,17 @@ async function getMovieRequestCollection(): Promise<Collection<MovieRequestDocum
 }
 
 function toRecord(document: MovieRequestDocument & { _id: ObjectId }): MovieRequestRecord {
-  const { _id, ...request } = document;
-  return { id: _id.toHexString(), ...request };
+  const { _id, requestType = "movie", description = null, ...request } = document;
+  return { id: _id.toHexString(), ...request, requestType, description };
 }
 
-async function sendNewRequestNotification(title: string, requestCount: number, receivedAt: Date) {
+async function sendNewRequestNotification(
+  requestType: MovieRequestType,
+  title: string,
+  description: string | null,
+  requestCount: number,
+  receivedAt: Date,
+) {
   const token = requiredEnvironment("TELEGRAM_BOT_TOKEN");
   const chatId = requiredEnvironment("TELEGRAM_REQUESTS_CHANNEL_ID");
   const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -92,7 +123,7 @@ async function sendNewRequestNotification(title: string, requestCount: number, r
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       chat_id: chatId,
-      text: formatMovieRequestTelegramMessage(title, requestCount, receivedAt),
+      text: formatMovieRequestTelegramMessage(requestType, title, description, requestCount, receivedAt),
       disable_web_page_preview: true,
     }),
   });
@@ -103,14 +134,25 @@ async function sendNewRequestNotification(title: string, requestCount: number, r
   }
 }
 
-export async function submitMovieRequest(rawTitle: string) {
+export async function submitMovieRequest(
+  rawTitle: string,
+  requestType: MovieRequestType = "movie",
+  rawDescription?: string | null,
+) {
   const requestedTitle = cleanMovieRequestTitle(rawTitle);
   const normalizedTitle = normalizeMovieRequestTitle(requestedTitle);
+  const description = cleanMovieRequestDescription(rawDescription);
   const collection = await getMovieRequestCollection();
   const now = new Date();
 
   const existing = await collection.findOneAndUpdate(
-    { normalizedTitle, status: { $in: ["new", "searching"] } },
+    requestType === "movie"
+      ? {
+          normalizedTitle,
+          status: { $in: ["new", "searching"] },
+          $or: [{ requestType: "movie" }, { requestType: { $exists: false } }],
+        }
+      : { normalizedTitle, requestType, status: { $in: ["new", "searching"] } },
     { $inc: { requestCount: 1 }, $set: { updatedAt: now, lastRequestedAt: now } },
     { returnDocument: "after" },
   );
@@ -122,6 +164,8 @@ export async function submitMovieRequest(rawTitle: string) {
   const newRequest: MovieRequestDocument = {
     requestedTitle,
     normalizedTitle,
+    requestType,
+    description,
     status: "new",
     requestCount: 1,
     adminNote: null,
@@ -135,7 +179,7 @@ export async function submitMovieRequest(rawTitle: string) {
   const request = { ...newRequest, _id: inserted.insertedId };
 
   try {
-    await sendNewRequestNotification(requestedTitle, 1, now);
+    await sendNewRequestNotification(requestType, requestedTitle, description, 1, now);
     await collection.updateOne(
       { _id: inserted.insertedId },
       { $set: { notificationStatus: "sent", telegramNotificationSentAt: new Date(), updatedAt: new Date() } },

@@ -2,9 +2,9 @@
 
 ## What the feature does
 
-CineLink visitors can submit a movie request by entering only a movie name. They do not need an account, and the form does not collect a Telegram username, email address, or other contact details. The request server normalizes the name and checks the `movie_requests` MongoDB collection.
+CineLink visitors can submit a **Movie** or **Series** request from the public Request menu by selecting the type, entering its title, and optionally adding details such as subtitles, season, or episode. They do not need an account, and the form does not collect a Telegram username, email address, or other contact details. The request server normalizes the title and checks the `movie_requests` MongoDB collection.
 
-When a title is new, CineLink creates one MongoDB document and posts a plain-text notification to the private **CineLink Requests** Telegram channel. When a visitor requests an existing `new` or `searching` title again, CineLink increases its `requestCount` and `lastRequestedAt` only. It intentionally does not send a second Telegram notification.
+When a title is new, CineLink creates one MongoDB document and posts a plain-text notification to the private **CineLink Requests** Telegram channel. Duplicate matching is separated by request type, so a Movie and a Series with the same title remain distinct. When a visitor requests an existing `new` or `searching` title of the same type again, CineLink increases its `requestCount` and `lastRequestedAt` only. It intentionally does not send a second Telegram notification.
 
 > The Requests channel is an operational queue only. It does not trigger the Movies/Series auto-publishing bot flow and it must not be added to the Movies or Series ingest allowlist.
 
