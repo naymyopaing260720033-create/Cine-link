@@ -1,7 +1,7 @@
 /*
- * MIDNIGHT MARQUEE — Movie detail.
- * Split layout: 1/3 poster rail + 2/3 content zone.
- * Signature marquee "Watch on Telegram" CTA + inline trailer playback.
+ * MIDNIGHT TEAL & EMERALD — Movie detail.
+ * Poster-led editorial feature card with Marquee Amber cinema signals and
+ * optional TMDB-ID keyed Myanmar title/synopsis overrides.
  */
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
@@ -22,6 +22,7 @@ import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromMovie } from "@/hooks/useFavorites";
 import { useViewedMovies } from "@/hooks/useViewedMovies";
 import HorizontalRail, { toRailItem, type RailItem } from "@/components/HorizontalRail";
+import { getMyanmarMovieContent } from "@/content/myanmarMovieDetails";
 import {
   getMovie,
   getSimilarMovies,
@@ -132,6 +133,10 @@ export default function MovieDetail() {
     (v) => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser"),
   );
   const cast = movie.credits?.cast?.slice(0, 6) ?? [];
+  const myanmarContent = getMyanmarMovieContent(movie.id);
+  const displayTitle = myanmarContent?.title || movie.title;
+  const displayTagline = myanmarContent?.tagline || movie.tagline;
+  const displaySynopsis = myanmarContent?.synopsis || movie.overview || "No overview available.";
 
   return (
     <SiteLayout>
@@ -165,14 +170,14 @@ export default function MovieDetail() {
           <div className="detail-poster-rail z-10 w-full max-w-[220px] md:max-w-[240px] mx-auto md:mx-0">
             <img
               src={posterUrl(movie.poster_path, "w342") || ""}
-              alt={movie.title}
+              alt={displayTitle}
               className="block aspect-[2/3] object-cover rounded-lg shadow-2xl border border-border w-full"
             />
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2">
                 <WatchButton
                   movieId={movie.id}
-                  movieTitle={movie.title}
+                  movieTitle={displayTitle}
                   size="sm"
                   className="flex-1 justify-center px-3 py-2 text-[0.72rem] leading-none"
                 />
@@ -188,13 +193,13 @@ export default function MovieDetail() {
           {/* content zone */}
           <div className="relative z-10 space-y-6">
             <p className="detail-kicker">Feature Presentation</p>
-            {movie.tagline && (
-              <p className="text-sm italic text-gold font-display">
-                "{movie.tagline}"
+            {displayTagline && (
+              <p className="text-sm italic text-gold font-display" lang={myanmarContent?.tagline ? "my" : undefined}>
+                "{displayTagline}"
               </p>
             )}
-            <h1 className="font-display font-black text-3xl sm:text-4xl md:text-5xl leading-tight">
-              {movie.title}
+            <h1 className="font-display font-black text-3xl sm:text-4xl md:text-5xl leading-tight" lang={myanmarContent?.title ? "my" : undefined}>
+              {displayTitle}
             </h1>
 
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
@@ -229,8 +234,8 @@ export default function MovieDetail() {
 
             <section className="detail-synopsis">
               <p className="detail-synopsis-label">Synopsis</p>
-              <p className="text-muted-foreground leading-relaxed">
-                {movie.overview || "No overview available."}
+              <p className="text-muted-foreground leading-relaxed" lang={myanmarContent?.synopsis ? "my" : undefined}>
+                {displaySynopsis}
               </p>
             </section>
 

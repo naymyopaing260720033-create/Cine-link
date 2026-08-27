@@ -230,14 +230,21 @@
 ## Movie Detail Synopsis Refinement
 
 - [x] Inspect the current synopsis layout, typography, and mobile behavior.
-- [ ] Confirm the preferred synopsis presentation before editing.
-- [ ] Implement the approved synopsis treatment and validate responsive behavior.
+- [x] Confirm the preferred synopsis presentation before editing.
+- [x] Implement the approved synopsis treatment and validate responsive behavior.
 
 ## Manual Myanmar Movie Details
 
 - [x] Review the current static movie detail flow and planned backend catalog boundary.
 - [x] Present maintainable approaches for manually adding Burmese movie details.
-- [ ] Confirm the selected content-management workflow before implementation.
+- [x] Confirm the selected content-management workflow before implementation.
+
+## Editable Myanmar Movie Content Registry
+
+- [x] Define the editable TMDB-ID keyed schema and create a documented content registry.
+- [x] Render a manual Myanmar title and Synopsis in Movie Detail while retaining TMDB fallbacks.
+- [x] Validate an existing manual record and a TMDB-only movie at desktop and mobile sizes.
+- [x] Document the no-code-value editing workflow for future movie entries.
 
 ## Color Design Direction
 
