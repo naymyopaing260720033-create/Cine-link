@@ -16,10 +16,12 @@ Open `/admin`, sign in with the CineLink owner account, and scroll to **Audience
 |---|---|
 | `New` | Default state for a newly received request. |
 | `Searching` | The title is being checked or sourced. |
-| `Available` | The title is now available for CineLink viewers. |
-| `Declined` | The title will not be added. |
-| Internal note | Optional private context for the CineLink admin team. It is never shown publicly. |
+| `ပြီးစီးပြီ (Fulfilled)` | One-click **Fulfilled လုပ်မည်** action. Internally stored as `available`; the title is now available for CineLink viewers. |
+| `ပယ်ချပြီး (Rejected)` | One-click **ပယ်ချမည် (Reject)** action. Internally stored as `declined`; the request is closed without adding the title. |
+| `Admin မှတ်ချက်` | Optional private context saved together with the moderation response. It is never shown publicly. |
 | Delete | Permanently removes the request record from MongoDB. Use only for clear mistakes or unwanted entries. |
+
+Because requests are anonymous and collect no contact information, **Fulfilled**, **Rejected**, and the optional note are operational responses in the admin queue only. CineLink does not send a direct reply or Telegram message to an individual requester when the status changes.
 
 ## Required deployment configuration
 

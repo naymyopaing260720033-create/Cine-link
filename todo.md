@@ -308,3 +308,10 @@
 - [x] Add automated duplicate-request coverage for MongoDB demand aggregation and one-time Telegram notification behavior.
 - [x] Repair the duplicate-request test mock so the new coverage can run successfully.
 - [x] Perform an operator-approved live website submission to verify one private Telegram Requests channel notification.
+
+## Movie Request Fulfillment Responses
+
+- [x] Review existing admin moderation status options and response-note behavior.
+- [x] Add one-click Fulfilled and Rejected actions with distinct visual states.
+- [x] Preserve optional admin notes and show updated completion/rejection status in the request list.
+- [x] Validate admin-only persistence, responsive controls, tests, and production build.

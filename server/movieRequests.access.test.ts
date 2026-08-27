@@ -35,6 +35,20 @@ describe("movieRequests access", () => {
     await expect(caller.movieRequests.list()).rejects.toMatchObject({ message: NOT_ADMIN_ERR_MSG });
   });
 
+  it("does not allow a signed-in non-admin to fulfill or reject a movie request", async () => {
+    const caller = appRouter.createCaller(createContext("user"));
+    await expect(caller.movieRequests.update({
+      id: "507f1f77bcf86cd799439011",
+      status: "available",
+      adminNote: "Ready to watch",
+    })).rejects.toMatchObject({ message: NOT_ADMIN_ERR_MSG });
+    await expect(caller.movieRequests.update({
+      id: "507f1f77bcf86cd799439011",
+      status: "declined",
+      adminNote: "Unavailable",
+    })).rejects.toMatchObject({ message: NOT_ADMIN_ERR_MSG });
+  });
+
   it("rejects an invalid request title before connecting to external services", async () => {
     const caller = appRouter.createCaller(createContext("user"));
     await expect(caller.movieRequests.submit({ title: " " })).rejects.toMatchObject({
