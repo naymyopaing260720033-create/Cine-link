@@ -14,8 +14,8 @@ import Favorites from "./pages/Favorites";
 import ColorDirections from "./pages/ColorDirections";
 import { FavoritesProvider } from "./hooks/useFavorites";
 
-
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />

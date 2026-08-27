@@ -23,6 +23,7 @@ import { favoriteFromMovie } from "@/hooks/useFavorites";
 import { useViewedMovies } from "@/hooks/useViewedMovies";
 import HorizontalRail, { toRailItem, type RailItem } from "@/components/HorizontalRail";
 import { getMyanmarMovieContent } from "@/content/myanmarMovieDetails";
+import { trpc } from "@/lib/trpc";
 import {
   getMovie,
   getSimilarMovies,
@@ -40,6 +41,10 @@ export default function MovieDetail() {
   const [similarLoading, setSimilarLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const { markMovieViewed } = useViewedMovies();
+  const databaseContentQuery = trpc.myanmarMovieContent.byTmdbId.useQuery(
+    { tmdbId: movieId },
+    { enabled: Number.isInteger(movieId) && movieId > 0 },
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -134,17 +139,23 @@ export default function MovieDetail() {
   );
   const cast = movie.credits?.cast?.slice(0, 6) ?? [];
   const myanmarContent = getMyanmarMovieContent(movie.id);
-  const displayTitle = myanmarContent?.title || movie.title;
-  const displayTagline = myanmarContent?.tagline || movie.tagline;
-  const displaySynopsis = myanmarContent?.synopsis || movie.overview || "No overview available.";
+  const databaseContent = databaseContentQuery.data;
+  const displayTitle = databaseContent?.title || myanmarContent?.title || movie.title;
+  const displayTagline = databaseContent?.tagline || myanmarContent?.tagline || movie.tagline;
+  const displaySynopsis = databaseContent?.synopsis || myanmarContent?.synopsis || movie.overview || "No overview available.";
+  const hasDatabaseTitle = Boolean(databaseContent?.title);
+  const hasDatabaseTagline = Boolean(databaseContent?.tagline);
+  const hasDatabaseSynopsis = Boolean(databaseContent?.synopsis);
+  const displayPosterUrl = databaseContent?.posterUrl || posterUrl(movie.poster_path, "w342") || "";
+  const displayBackdropUrl = databaseContent?.backdropUrl || (movie.backdrop_path ? posterUrl(movie.backdrop_path) : "");
 
   return (
     <SiteLayout>
       {/* backdrop wash */}
-      {movie.backdrop_path && (
+      {displayBackdropUrl && (
         <div className="fixed inset-0 -z-10">
           <img
-            src={posterUrl(movie.backdrop_path)}
+            src={displayBackdropUrl}
             alt=""
             className="w-full h-full object-cover opacity-20 blur-2xl"
           />
@@ -169,7 +180,7 @@ export default function MovieDetail() {
           {/* poster rail */}
           <div className="detail-poster-rail z-10 w-full max-w-[220px] md:max-w-[240px] mx-auto md:mx-0">
             <img
-              src={posterUrl(movie.poster_path, "w342") || ""}
+              src={displayPosterUrl}
               alt={displayTitle}
               className="block aspect-[2/3] object-cover rounded-lg shadow-2xl border border-border w-full"
             />
@@ -194,11 +205,11 @@ export default function MovieDetail() {
           <div className="relative z-10 space-y-6">
             <p className="detail-kicker">Feature Presentation</p>
             {displayTagline && (
-              <p className="text-sm italic text-gold font-display" lang={myanmarContent?.tagline ? "my" : undefined}>
+              <p className="text-sm italic text-gold font-display" lang={hasDatabaseTagline || myanmarContent?.tagline ? "my" : undefined}>
                 "{displayTagline}"
               </p>
             )}
-            <h1 className="font-display font-black text-3xl sm:text-4xl md:text-5xl leading-tight" lang={myanmarContent?.title ? "my" : undefined}>
+            <h1 className="font-display font-black text-3xl sm:text-4xl md:text-5xl leading-tight" lang={hasDatabaseTitle || myanmarContent?.title ? "my" : undefined}>
               {displayTitle}
             </h1>
 
@@ -234,7 +245,7 @@ export default function MovieDetail() {
 
             <section className="detail-synopsis">
               <p className="detail-synopsis-label">Synopsis</p>
-              <p className="text-muted-foreground leading-relaxed" lang={myanmarContent?.synopsis ? "my" : undefined}>
+              <p className="text-muted-foreground leading-relaxed" lang={hasDatabaseSynopsis || myanmarContent?.synopsis ? "my" : undefined}>
                 {displaySynopsis}
               </p>
             </section>

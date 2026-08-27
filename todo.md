@@ -239,6 +239,26 @@
 - [x] Present maintainable approaches for manually adding Burmese movie details.
 - [x] Confirm the selected content-management workflow before implementation.
 
+## Database-backed Admin Editor
+
+- [x] Upgrade the static CineLink project to the authenticated full-stack template.
+- [x] Resolve full-stack merge conflicts while preserving CineLink public pages and client-only behavior.
+- [x] Install and verify the full-stack scaffold dependencies before implementing the editor.
+- [x] Remove the injected Home auth placeholder that conflicts with CineLink loading state.
+- [x] Define and migrate a shared Myanmar movie content table keyed by TMDB movie ID.
+- [x] Add admin-only list, create, update, and delete server procedures.
+- [x] Replace the current local Admin page with a dashboard editor and secure sign-in state.
+- [x] Read public overrides in Movie Detail while retaining static and TMDB fallbacks.
+- [x] Test access control, content CRUD, public rendering, and responsive editor behavior.
+
+## Admin-managed Movie Images
+
+- [x] Define poster and backdrop image override metadata with safe file type and size limits.
+- [x] Add image metadata fields, migration, protected upload handling, and storage persistence.
+- [x] Add poster/backdrop upload, preview, replacement, and fallback controls to the Editorial Desk.
+- [x] Render database image overrides on public Movie Detail pages with TMDB image fallback.
+- [x] Validate image upload security, responsive presentation, and admin-only access.
+
 ## Editable Myanmar Movie Content Registry
 
 - [x] Define the editable TMDB-ID keyed schema and create a documented content registry.
@@ -270,3 +290,21 @@
 - [x] Restore Marquee Amber to brand, rating, section, and warm-projector moments while preserving emerald action states.
 - [x] Recompose movie and series details as poster/backdrop-led cinematic feature pages.
 - [x] Add consistent ticket texture and editorial rhythm to detail-page content zones and rails.
+
+## Movie Requests — MongoDB and Telegram
+
+- [x] Review full-stack and Python bot boundaries for a server-only request submission flow.
+- [x] Add MongoDB movie request model, title normalization, duplicate demand aggregation, and request-channel notification service.
+- [x] Resolve the initial Movie Request server integration conflict and restore the TypeScript build.
+- [x] Add a secure public name-only request procedure with validation and honeypot handling.
+- [x] Ensure the public honeypot returns a safe acknowledgement without touching MongoDB or Telegram.
+- [x] Align invalid-title test expectations with the active Zod validation message.
+- [x] Add a compact public request form without changing the Home/Movies/Series navigation categories.
+- [x] Complete the Home footer integration for the public Movie Request form.
+- [x] Add authenticated admin request list, status, note, and deletion controls to the Editorial Desk.
+- [x] Add request-channel environment-variable documentation and isolate it from auto-publish channel processing.
+- [x] Add a Vercel serverless tRPC bridge while retaining the Python Telegram webhook route and SPA fallback.
+- [x] Test validation, duplicate behavior, admin authorization, notification payloads, UI states, and production build.
+- [x] Add automated duplicate-request coverage for MongoDB demand aggregation and one-time Telegram notification behavior.
+- [x] Repair the duplicate-request test mock so the new coverage can run successfully.
+- [ ] Perform an operator-approved live website submission to verify one private Telegram Requests channel notification.

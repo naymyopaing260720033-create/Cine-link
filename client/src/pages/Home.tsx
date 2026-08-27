@@ -16,6 +16,7 @@ import HorizontalRail, {
   toRailSeries,
   type RailItem,
 } from "@/components/HorizontalRail";
+import MovieRequestForm from "@/components/MovieRequestForm";
 import {
   getTrending,
   getPopular,
@@ -344,28 +345,23 @@ export default function Home() {
 
       {/* ── Bot footer CTA ───────────────────────────────────── */}
       <section className="telegram-marquee border-t border-border bg-card/60">
-        <div className="container py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="font-display font-bold text-lg text-foreground">
-            Tonight&apos;s feature, delivered via Telegram
-            {telegramReady && <span className="text-gold"> — @{cfg.telegramBotUsername}</span>}
-          </p>
-          {telegramReady ? (
-            <a
-              href={`https://t.me/${cfg.telegramBotUsername}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Button
-                size="sm"
-                className="marquee-chip teal-cta-glow bg-primary text-primary-foreground font-semibold gap-1.5 transition-shadow duration-200 active:scale-[0.97]"
-              >
-                <Send className="h-3.5 w-3.5" />
-                Enter Telegram
-              </Button>
-            </a>
-          ) : (
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold/85">Telegram delivery is being prepared</p>
-          )}
+        <div className="container grid gap-6 py-10 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.8fr)] lg:items-center">
+          <div>
+            <p className="font-display font-bold text-lg text-foreground">
+              Tonight&apos;s feature, delivered via Telegram
+              {telegramReady && <span className="text-gold"> — @{cfg.telegramBotUsername}</span>}
+            </p>
+            <div className="mt-4">
+              {telegramReady ? (
+                <a href={`https://t.me/${cfg.telegramBotUsername}`} target="_blank" rel="noreferrer">
+                  <Button size="sm" className="marquee-chip teal-cta-glow bg-primary text-primary-foreground font-semibold gap-1.5 transition-shadow duration-200 active:scale-[0.97]"><Send className="h-3.5 w-3.5" /> Enter Telegram</Button>
+                </a>
+              ) : (
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold/85">Telegram delivery is being prepared</p>
+              )}
+            </div>
+          </div>
+          <MovieRequestForm variant="footer" />
         </div>
       </section>
     </SiteLayout>
