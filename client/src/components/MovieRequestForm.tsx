@@ -3,7 +3,7 @@
  * MIDNIGHT TEAL & EMERALD: a ticket-like request prompt that never
  * exposes Telegram or database credentials to the browser.
  */
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { ArrowRight, Film, Loader2, Send, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +43,28 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
   const [website, setWebsite] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [availableMatches, setAvailableMatches] = useState<AvailableCatalogMatch[]>([]);
+
+  // Instant catalog lookup while typing
+  const [debouncedTitle, setDebouncedTitle] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedTitle(title.trim()), 600);
+    return () => clearTimeout(timer);
+  }, [title]);
+
+  const lookup = trpc.movieRequests.lookupCatalog.useQuery(
+    { title: debouncedTitle, type: requestType },
+    { enabled: debouncedTitle.length >= 2 },
+  );
+
+  useEffect(() => {
+    if (lookup.data && lookup.data.length > 0) {
+      setAvailableMatches(lookup.data);
+    } else if (debouncedTitle.length >= 2) {
+      // If we looked it up and found nothing, clear previous matches
+      setAvailableMatches([]);
+    }
+  }, [lookup.data, debouncedTitle]);
+
   const submitRequest = trpc.movieRequests.submit.useMutation({
     onSuccess: (result) => {
       if (result.resolution === "available") {
@@ -166,8 +188,8 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
           <p className="text-xs leading-relaxed text-muted-foreground">Request အသစ်တစ်ခုကို private CineLink request queue သို့သာပို့ပါမည်။ ထပ်တူ request များသည် demand count ကိုသာတိုးပေးပါမည်။</p>
           {feedback ? <p role="status" className="rounded-lg border border-primary/25 bg-primary/10 px-3 py-2.5 text-sm font-medium leading-relaxed text-foreground">{feedback} <a href="/requests" className="ml-1 font-bold text-primary underline underline-offset-2 hover:text-gold">မိမိတောင်းဆိုမှုများ</a></p> : null}
           {availableMatches.length ? (
-            <div className="space-y-2 rounded-xl border border-emerald-400/30 bg-emerald-400/5 p-3">
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-300">CineLink တွင်ရရှိနိုင်သော title</p>
+            <div className="space-y-2 rounded-xl border border-emerald-400/30 bg-emerald-400/5 p-3 animate-in fade-in slide-in-from-top-2 duration-300">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-300">ဤဇာတ်ကားသည် CineLink တွင် ရှိပြီးသားဖြစ်ပါသည်</p>
               {availableMatches.map((match) => (
                 <a key={`${match.kind}-${match.tmdbId}`} href={match.kind === "movie" ? `/movie/${match.tmdbId}` : `/tv/${match.tmdbId}`} onClick={() => onOpenChange(false)} className="group flex items-center gap-3 rounded-lg border border-border/70 bg-background/55 p-2.5 transition-colors hover:border-primary/60 hover:bg-accent">
                   <div className="h-14 w-10 shrink-0 overflow-hidden rounded border border-border bg-secondary">
@@ -182,9 +204,9 @@ export default function MovieRequestForm({ open, onOpenChange }: MovieRequestFor
               ))}
             </div>
           ) : null}
-          <Button type="submit" disabled={submitRequest.isPending} className="marquee-chip teal-cta-glow h-11 w-full bg-primary text-base font-bold text-primary-foreground active:scale-[0.97]">
+          <Button type="submit" disabled={submitRequest.isPending || availableMatches.length > 0} className="marquee-chip teal-cta-glow h-11 w-full bg-primary text-base font-bold text-primary-foreground active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed">
             {submitRequest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            တောင်းဆိုမည်
+            {availableMatches.length > 0 ? "ရှိပြီးသားဖြစ်ပါသည်" : "တောင်းဆိုမည်"}
           </Button>
         </form>
       </DialogContent>

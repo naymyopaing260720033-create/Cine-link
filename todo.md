@@ -348,7 +348,14 @@
 
 ## Bug Fix: Movie Request API Mutation Error
 
-- [ ] Inspect server logs to identify the root cause of the TRPCClientError.
-- [ ] Fix MongoDB connection or mutation logic in `server/movieRequests.ts`.
-- [ ] Verify the fix with unit tests and a manual preview test.
-- [ ] Ensure the production build is stable and report back to the user.
+- [x] Inspect server logs to identify the root cause of the TRPCClientError.
+- [x] Fix MongoDB connection or mutation logic in `server/movieRequests.ts`.
+- [x] Verify the fix with unit tests and a manual preview test.
+- [x] Ensure the production build is stable and report back to the user.
+
+## Catalog-first Result Link Enhancement
+
+- [x] Inspect the current request modal to ensure matching catalog titles are visually prioritized.
+- [x] Ensure the matching card links directly to the public detail page and closes the modal.
+- [x] Verify that no admin request is created when a catalog match is found and displayed.
+- [x] Validate the UI with a live catalog title in the preview server.

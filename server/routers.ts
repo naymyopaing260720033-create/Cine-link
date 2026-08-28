@@ -194,6 +194,9 @@ export const appRouter = router({
     mine: publicProcedure
       .input(z.object({ browserToken: z.string().min(32).max(128) }))
       .query(({ input }) => listVisitorMovieRequests(input.browserToken)),
+    lookupCatalog: publicProcedure
+      .input(z.object({ title: z.string().trim().min(2), type: z.enum(MOVIE_REQUEST_TYPES) }))
+      .query(({ input }) => findAvailableCatalogMatches(input.type, input.title)),
     update: adminProcedure
       .input(
         z.object({
