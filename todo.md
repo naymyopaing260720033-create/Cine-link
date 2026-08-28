@@ -359,3 +359,11 @@
 - [x] Ensure the matching card links directly to the public detail page and closes the modal.
 - [x] Verify that no admin request is created when a catalog match is found and displayed.
 - [x] Validate the UI with a live catalog title in the preview server.
+
+## Performance Optimization
+
+- [x] Audit build output and code-splitting opportunities (manualChunks, dynamic imports).
+- [x] Implement image lazy-loading and optimized TMDB image sizes across rails and detail pages.
+- [x] Optimize data fetching with React Query staleTime/cacheTime and prefetching for detail pages.
+- [x] Refine mobile rendering and layout stability to minimize layout shifts (CLS).
+- [x] Verify optimization results with production builds and responsive preview tests.

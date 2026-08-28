@@ -12,6 +12,7 @@ import { posterUrl, movieYear, seriesYear, getGenres } from "@/lib/tmdb";
 import MarqueeSkeleton from "@/components/MarqueeSkeleton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromMovie, favoriteFromSeries } from "@/hooks/useFavorites";
+import { trpc } from "@/lib/trpc";
 
 export type RailItem =
   | { kind: "movie"; data: TmdbMovie }
@@ -187,6 +188,10 @@ function RailCard({
   const rating = item.data.vote_average;
   const poster = posterUrl(item.data.poster_path);
   const badge = badgeFor(item, index);
+  const utils = trpc.useUtils();
+  const prefetch = () => {
+    utils.myanmarMovieContent.byTmdbId.prefetch({ tmdbId: item.data.id });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -210,7 +215,7 @@ function RailCard({
         animation: "fadeUp 320ms var(--ease-out) both",
       }}
     >
-      <Link href={itemHref(item)} className="block">
+      <Link href={itemHref(item)} className="block" onMouseEnter={prefetch} onTouchStart={prefetch}>
         <div className="relative aspect-[2/3] rounded-md overflow-hidden bg-secondary [&>*:first-child]:object-cover">
           {poster ? (
             <img

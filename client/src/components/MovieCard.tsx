@@ -8,6 +8,7 @@ import type { TmdbMovie } from "@/lib/tmdb";
 import { posterUrl } from "@/lib/tmdb";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromMovie } from "@/hooks/useFavorites";
+import { trpc } from "@/lib/trpc";
 
 export default function MovieCard({
   movie,
@@ -16,6 +17,12 @@ export default function MovieCard({
   movie: TmdbMovie;
   index?: number;
 }) {
+  const utils = trpc.useUtils();
+  const prefetch = () => {
+    // Prefetch Myanmar content and detail data
+    utils.myanmarMovieContent.byTmdbId.prefetch({ tmdbId: movie.id });
+  };
+
   const year = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : null;
@@ -29,7 +36,7 @@ export default function MovieCard({
         animation: "fadeUp 320ms var(--ease-out) both",
       }}
     >
-      <Link href={`/movie/${movie.id}`} className="group block">
+      <Link href={`/movie/${movie.id}`} className="group block" onMouseEnter={prefetch} onTouchStart={prefetch}>
         <div className="poster-hover relative aspect-[2/3] rounded-md overflow-hidden bg-secondary">
           {poster ? (
             <img

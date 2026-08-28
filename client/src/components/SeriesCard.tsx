@@ -8,6 +8,7 @@ import type { TmdbSeries } from "@/lib/tmdb";
 import { posterUrl, seriesYear } from "@/lib/tmdb";
 import FavoriteButton from "@/components/FavoriteButton";
 import { favoriteFromSeries } from "@/hooks/useFavorites";
+import { trpc } from "@/lib/trpc";
 
 export default function SeriesCard({
   series,
@@ -16,6 +17,12 @@ export default function SeriesCard({
   series: TmdbSeries;
   index?: number;
 }) {
+  const utils = trpc.useUtils();
+  const prefetch = () => {
+    // Prefetch Myanmar content (even if not yet implemented for series, it's good practice)
+    utils.myanmarMovieContent.byTmdbId.prefetch({ tmdbId: series.id });
+  };
+
   const year = seriesYear(series);
   const poster = posterUrl(series.poster_path);
 
@@ -27,7 +34,7 @@ export default function SeriesCard({
         animation: "fadeUp 320ms var(--ease-out) both",
       }}
     >
-      <Link href={`/tv/${series.id}`} className="group block">
+      <Link href={`/tv/${series.id}`} className="group block" onMouseEnter={prefetch} onTouchStart={prefetch}>
         <div className="poster-hover relative aspect-[2/3] rounded-md overflow-hidden bg-secondary">
           {poster ? (
             <img

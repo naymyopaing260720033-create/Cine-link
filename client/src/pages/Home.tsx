@@ -4,7 +4,7 @@
  * then horizontal scroll sections: Movies, Series, Recently Added Movies, Latest Update.
  * No tab switcher — movies and series show as their own rails.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { Play, Info, Send, Star, Calendar, Loader2, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,11 @@ export default function Home() {
   const cfg = loadConfig();
   const telegramReady = hasConfiguredTelegramBot(cfg.telegramBotUsername);
   const featured = featuredPool[featuredIndex] ?? null;
+
+  const isMobile = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < 768;
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -155,7 +160,7 @@ export default function Home() {
             <>
               <img
                 key={`hero-backdrop-${f.id}`}
-                  src={backdropUrl(f.backdrop_path, "w1280") || ""}
+                src={backdropUrl(f.backdrop_path, isMobile ? "w780" : "w1280") || ""}
                 alt=""
                 className="hero-backdrop hero-backdrop-crossfade absolute inset-0 h-full w-full object-cover"
               />
@@ -170,7 +175,7 @@ export default function Home() {
               <div className="hero-poster-frame relative h-full w-full overflow-hidden rounded-md">
                 <img
                   key={`hero-poster-${f.id}`}
-                  src={posterUrl(f.poster_path, "w1280") || ""}
+                  src={posterUrl(f.poster_path, "w780") || ""}
                   alt=""
                   className="hero-poster hero-poster-crossfade h-full w-full object-cover"
                 />
