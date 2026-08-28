@@ -26,6 +26,9 @@ const { collection, catalogCollection, FakeMongoClient, FakeObjectId } = vi.hois
     db() {
       return { collection: (name: string) => name === "catalog" ? catalogCollection : collection };
     }
+    on() {
+      return this;
+    }
   }
 
   return { collection, catalogCollection, FakeMongoClient, FakeObjectId };

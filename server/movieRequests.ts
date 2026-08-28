@@ -58,13 +58,40 @@ type CatalogDocument = {
 export class MovieRequestInputError extends Error {}
 export class MovieRequestDeliveryError extends Error {}
 
-let mongoClient: MongoClient | null = null;
 let indexesReady = false;
 
 function requiredEnvironment(name: "MONGODB_URI" | "TELEGRAM_BOT_TOKEN" | "TELEGRAM_REQUESTS_CHANNEL_ID") {
   const value = process.env[name]?.trim();
   if (!value) throw new MovieRequestDeliveryError(`${name} is not configured.`);
   return value;
+}
+
+/**
+ * Resilient MongoClient helper that survives HMR and handles topology closures.
+ */
+async function getMongoClient(): Promise<MongoClient> {
+  const uri = requiredEnvironment("MONGODB_URI");
+  const global = globalThis as any;
+
+  if (!global.__mongoClient) {
+    console.log("[Movie Requests] Initializing new MongoClient...");
+    const client = new MongoClient(uri, {
+      appName: "CineLinkMovieRequests",
+      serverSelectionTimeoutMS: 6_000,
+      connectTimeoutMS: 10_000,
+      heartbeatFrequencyMS: 10_000,
+    });
+
+    // Monitor topology to reset on closure
+    client.on("topologyClosed", () => {
+      console.warn("[Movie Requests] MongoDB topology closed. Resetting client.");
+      global.__mongoClient = null;
+    });
+
+    global.__mongoClient = client;
+  }
+
+  return global.__mongoClient;
 }
 
 export function cleanMovieRequestTitle(value: string) {
@@ -129,23 +156,22 @@ export function formatMovieRequestTelegramMessage(
 }
 
 async function getMovieRequestCollection(): Promise<Collection<MovieRequestDocument>> {
-  const uri = requiredEnvironment("MONGODB_URI");
-  if (!mongoClient) {
-    mongoClient = new MongoClient(uri, {
-      appName: "CineLinkMovieRequests",
-      serverSelectionTimeoutMS: 6_000,
-    });
-  }
-
+  const client = await getMongoClient();
   const databaseName = process.env.MONGODB_DB_NAME?.trim() || "cinelink";
-  const collection = mongoClient.db(databaseName).collection<MovieRequestDocument>("movie_requests");
+  const collection = client.db(databaseName).collection<MovieRequestDocument>("movie_requests");
+  
   if (!indexesReady) {
-    await collection.createIndex({ normalizedTitle: 1, status: 1 });
-    await collection.createIndex({ requestType: 1, normalizedTitle: 1, status: 1 });
-    await collection.createIndex({ requesterTokenHashes: 1, lastRequestedAt: -1 });
-    await collection.createIndex({ lastRequestedAt: -1 });
-    await collection.createIndex({ requestCount: -1, lastRequestedAt: -1 });
-    indexesReady = true;
+    try {
+      await collection.createIndex({ normalizedTitle: 1, status: 1 });
+      await collection.createIndex({ requestType: 1, normalizedTitle: 1, status: 1 });
+      await collection.createIndex({ requesterTokenHashes: 1, lastRequestedAt: -1 });
+      await collection.createIndex({ lastRequestedAt: -1 });
+      await collection.createIndex({ requestCount: -1, lastRequestedAt: -1 });
+      indexesReady = true;
+    } catch (error) {
+      console.error("[Movie Requests] Index creation failed", error);
+      // Don't block, but don't mark as ready
+    }
   }
   return collection;
 }
@@ -160,39 +186,42 @@ export async function findAvailableCatalogMatches(
 ): Promise<AvailableCatalogMatch[]> {
   const requestedTitle = cleanMovieRequestTitle(rawTitle);
   const normalizedTitle = normalizeMovieRequestTitle(requestedTitle);
-  const uri = requiredEnvironment("MONGODB_URI");
-  if (!mongoClient) {
-    mongoClient = new MongoClient(uri, {
-      appName: "CineLinkMovieRequests",
-      serverSelectionTimeoutMS: 6_000,
-    });
-  }
+  const client = await getMongoClient();
   const databaseName = process.env.MONGODB_DB_NAME?.trim() || "cinelink";
   const kind = requestType === "movie" ? "movie" : "episode";
   const titleLookupTerm = withoutTrailingReleaseYear(normalizedTitle);
-  const candidates = await mongoClient
-    .db(databaseName)
-    .collection<CatalogDocument>("catalog")
-    .find({ kind, status: "published", title: { $regex: escapeRegex(titleLookupTerm).replace(/\s+/g, "\\s+"), $options: "i" } })
-    .limit(30)
-    .toArray();
+  
+  try {
+    const candidates = await client
+      .db(databaseName)
+      .collection<CatalogDocument>("catalog")
+      .find({ kind, status: "published", title: { $regex: escapeRegex(titleLookupTerm).replace(/\s+/g, "\\s+"), $options: "i" } })
+      .limit(30)
+      .toArray();
 
-  const matches = new Map<string, AvailableCatalogMatch>();
-  for (const candidate of candidates) {
-    if (withoutTrailingReleaseYear(normalizeCatalogTitle(candidate.title)) !== titleLookupTerm) continue;
-    const catalogKind = candidate.kind === "movie" ? "movie" : "series";
-    const key = `${catalogKind}:${candidate.tmdbId}`;
-    if (!matches.has(key)) {
-      matches.set(key, {
-        kind: catalogKind,
-        tmdbId: candidate.tmdbId,
-        title: candidate.title,
-        posterPath: candidate.posterPath ?? null,
-        releaseDate: candidate.releaseDate ?? null,
-      });
+    const matches = new Map<string, AvailableCatalogMatch>();
+    for (const candidate of candidates) {
+      if (withoutTrailingReleaseYear(normalizeCatalogTitle(candidate.title)) !== titleLookupTerm) continue;
+      const catalogKind = candidate.kind === "movie" ? "movie" : "series";
+      const key = `${catalogKind}:${candidate.tmdbId}`;
+      if (!matches.has(key)) {
+        matches.set(key, {
+          kind: catalogKind,
+          tmdbId: candidate.tmdbId,
+          title: candidate.title,
+          posterPath: candidate.posterPath ?? null,
+          releaseDate: candidate.releaseDate ?? null,
+        });
+      }
     }
+    return Array.from(matches.values());
+  } catch (error: any) {
+    if (error.name === "MongoTopologyClosedError") {
+      (globalThis as any).__mongoClient = null;
+    }
+    console.error("[Movie Requests] Catalog lookup failed", error);
+    return [];
   }
-  return Array.from(matches.values());
 }
 
 function toRecord(document: MovieRequestDocument & { _id: ObjectId }): MovieRequestRecord {
@@ -240,77 +269,99 @@ export async function submitMovieRequest(
   const normalizedTitle = normalizeMovieRequestTitle(requestedTitle);
   const description = cleanMovieRequestDescription(rawDescription);
   const requesterTokenHash = browserRequestToken ? hashBrowserRequestToken(browserRequestToken) : null;
-  const collection = await getMovieRequestCollection();
-  const now = new Date();
-  const duplicateUpdate = {
-    $inc: { requestCount: 1 },
-    $set: { updatedAt: now, lastRequestedAt: now },
-    ...(requesterTokenHash ? { $addToSet: { requesterTokenHashes: requesterTokenHash } } : {}),
-  };
-
-  const existing = await collection.findOneAndUpdate(
-    requestType === "movie"
-      ? {
-          normalizedTitle,
-          status: { $in: ["new", "searching"] },
-          $or: [{ requestType: "movie" }, { requestType: { $exists: false } }],
-        }
-      : { normalizedTitle, requestType, status: { $in: ["new", "searching"] } },
-    duplicateUpdate,
-    { returnDocument: "after" },
-  );
-
-  if (existing) {
-    return { request: toRecord(existing), duplicate: true, notificationSent: false };
-  }
-
-  const newRequest: MovieRequestDocument = {
-    requestedTitle,
-    normalizedTitle,
-    requestType,
-    description,
-    requesterTokenHashes: requesterTokenHash ? [requesterTokenHash] : [],
-    status: "new",
-    requestCount: 1,
-    adminNote: null,
-    notificationStatus: "failed",
-    telegramNotificationSentAt: null,
-    createdAt: now,
-    updatedAt: now,
-    lastRequestedAt: now,
-  };
-  const inserted = await collection.insertOne(newRequest);
-  const request = { ...newRequest, _id: inserted.insertedId };
-
+  
   try {
-    await sendNewRequestNotification(requestType, requestedTitle, description, 1, now);
-    await collection.updateOne(
-      { _id: inserted.insertedId },
-      { $set: { notificationStatus: "sent", telegramNotificationSentAt: new Date(), updatedAt: new Date() } },
+    const collection = await getMovieRequestCollection();
+    const now = new Date();
+    const duplicateUpdate = {
+      $inc: { requestCount: 1 },
+      $set: { updatedAt: now, lastRequestedAt: now },
+      ...(requesterTokenHash ? { $addToSet: { requesterTokenHashes: requesterTokenHash } } : {}),
+    };
+
+    const existing = await collection.findOneAndUpdate(
+      requestType === "movie"
+        ? {
+            normalizedTitle,
+            status: { $in: ["new", "searching"] },
+            $or: [{ requestType: "movie" }, { requestType: { $exists: false } }],
+          }
+        : { normalizedTitle, requestType, status: { $in: ["new", "searching"] } },
+      duplicateUpdate,
+      { returnDocument: "after" },
     );
-    return { request: toRecord({ ...request, notificationStatus: "sent", telegramNotificationSentAt: new Date() }), duplicate: false, notificationSent: true };
-  } catch (error) {
-    if (error instanceof MovieRequestDeliveryError) throw error;
-    throw new MovieRequestDeliveryError("The request notification could not be delivered.");
+
+    if (existing) {
+      return { request: toRecord(existing), duplicate: true, notificationSent: false };
+    }
+
+    const newRequest: MovieRequestDocument = {
+      requestedTitle,
+      normalizedTitle,
+      requestType,
+      description,
+      requesterTokenHashes: requesterTokenHash ? [requesterTokenHash] : [],
+      status: "new",
+      requestCount: 1,
+      adminNote: null,
+      notificationStatus: "failed",
+      telegramNotificationSentAt: null,
+      createdAt: now,
+      updatedAt: now,
+      lastRequestedAt: now,
+    };
+    const inserted = await collection.insertOne(newRequest);
+    const request = { ...newRequest, _id: inserted.insertedId };
+
+    try {
+      await sendNewRequestNotification(requestType, requestedTitle, description, 1, now);
+      await collection.updateOne(
+        { _id: inserted.insertedId },
+        { $set: { notificationStatus: "sent", telegramNotificationSentAt: new Date(), updatedAt: new Date() } },
+      );
+      return { request: toRecord({ ...request, notificationStatus: "sent", telegramNotificationSentAt: new Date() }), duplicate: false, notificationSent: true };
+    } catch (error) {
+      if (error instanceof MovieRequestDeliveryError) throw error;
+      throw new MovieRequestDeliveryError("The request notification could not be delivered.");
+    }
+  } catch (error: any) {
+    if (error.name === "MongoTopologyClosedError") {
+      (globalThis as any).__mongoClient = null;
+    }
+    throw error;
   }
 }
 
 export async function listMovieRequests(status?: MovieRequestStatus) {
-  const collection = await getMovieRequestCollection();
-  const filter = status ? { status } : {};
-  const records = await collection.find(filter).sort({ lastRequestedAt: -1 }).toArray();
-  return records.map(toRecord);
+  try {
+    const collection = await getMovieRequestCollection();
+    const filter = status ? { status } : {};
+    const records = await collection.find(filter).sort({ lastRequestedAt: -1 }).toArray();
+    return records.map(toRecord);
+  } catch (error: any) {
+    if (error.name === "MongoTopologyClosedError") {
+      (globalThis as any).__mongoClient = null;
+    }
+    throw error;
+  }
 }
 
 /** Returns only non-sensitive fields from requests associated with one browser-local token. */
 export async function listVisitorMovieRequests(browserRequestToken: string) {
-  const collection = await getMovieRequestCollection();
-  const requesterTokenHash = hashBrowserRequestToken(browserRequestToken);
-  const records = await collection
-    .find({ requesterTokenHashes: requesterTokenHash })
-    .sort({ lastRequestedAt: -1 })
-    .toArray();
-  return records.map(toVisitorRecord);
+  try {
+    const collection = await getMovieRequestCollection();
+    const requesterTokenHash = hashBrowserRequestToken(browserRequestToken);
+    const records = await collection
+      .find({ requesterTokenHashes: requesterTokenHash })
+      .sort({ lastRequestedAt: -1 })
+      .toArray();
+    return records.map(toVisitorRecord);
+  } catch (error: any) {
+    if (error.name === "MongoTopologyClosedError") {
+      (globalThis as any).__mongoClient = null;
+    }
+    throw error;
+  }
 }
 
 export async function updateMovieRequest(
@@ -318,20 +369,34 @@ export async function updateMovieRequest(
   input: { status: MovieRequestStatus; adminNote?: string | null },
 ) {
   if (!ObjectId.isValid(id)) throw new MovieRequestInputError("Invalid request identifier.");
-  const collection = await getMovieRequestCollection();
-  const adminNote = input.adminNote?.replace(/\s+/g, " ").trim() || null;
-  const result = await collection.findOneAndUpdate(
-    { _id: new ObjectId(id) },
-    { $set: { status: input.status, adminNote, updatedAt: new Date() } },
-    { returnDocument: "after" },
-  );
-  if (!result) throw new MovieRequestInputError("Movie request was not found.");
-  return toRecord(result);
+  try {
+    const collection = await getMovieRequestCollection();
+    const adminNote = input.adminNote?.replace(/\s+/g, " ").trim() || null;
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { status: input.status, adminNote, updatedAt: new Date() } },
+      { returnDocument: "after" },
+    );
+    if (!result) throw new MovieRequestInputError("Movie request was not found.");
+    return toRecord(result);
+  } catch (error: any) {
+    if (error.name === "MongoTopologyClosedError") {
+      (globalThis as any).__mongoClient = null;
+    }
+    throw error;
+  }
 }
 
 export async function deleteMovieRequest(id: string) {
   if (!ObjectId.isValid(id)) throw new MovieRequestInputError("Invalid request identifier.");
-  const collection = await getMovieRequestCollection();
-  const result = await collection.deleteOne({ _id: new ObjectId(id) });
-  if (!result.deletedCount) throw new MovieRequestInputError("Movie request was not found.");
+  try {
+    const collection = await getMovieRequestCollection();
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    if (!result.deletedCount) throw new MovieRequestInputError("Movie request was not found.");
+  } catch (error: any) {
+    if (error.name === "MongoTopologyClosedError") {
+      (globalThis as any).__mongoClient = null;
+    }
+    throw error;
+  }
 }
