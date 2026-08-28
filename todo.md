@@ -345,3 +345,10 @@
 - [x] Show existing matching Movie/Series titles in the request modal instead of creating an admin request.
 - [x] Create a request and notify the private queue only when no available catalog title is found.
 - [x] Validate matching, no-match queue behavior, security, tests, and responsive modal presentation.
+
+## Bug Fix: Movie Request API Mutation Error
+
+- [ ] Inspect server logs to identify the root cause of the TRPCClientError.
+- [ ] Fix MongoDB connection or mutation logic in `server/movieRequests.ts`.
+- [ ] Verify the fix with unit tests and a manual preview test.
+- [ ] Ensure the production build is stable and report back to the user.
