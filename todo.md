@@ -367,3 +367,11 @@
 - [x] Optimize data fetching with React Query staleTime/cacheTime and prefetching for detail pages.
 - [x] Refine mobile rendering and layout stability to minimize layout shifts (CLS).
 - [x] Verify optimization results with production builds and responsive preview tests.
+
+## Search Filters & GitHub Sync
+
+- [ ] Implement Genre and Year selection in the Search page using TMDB discover/search APIs.
+- [ ] Ensure filters update results dynamically and handle responsive layouts on mobile.
+- [ ] Audit codebase for sensitive secrets before GitHub push.
+- [ ] Push latest validated code to `naymyopaing260720033-create/Cine-link` main branch.
+- [ ] Verify GitHub push success and provide repository link to the user.

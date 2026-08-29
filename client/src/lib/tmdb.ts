@@ -227,8 +227,31 @@ export async function searchMovies(
 export async function discoverByGenre(
   genreId: number,
   page = 1,
-): Promise<TmdbListResult<TmdbMovie>> {
-  return tmdbFetch(`/discover/movie?with_genres=${genreId}&sort_by=popularity.desc&page=${page}`);
+  mode: "movie" | "tv" = "movie",
+  year?: number,
+): Promise<TmdbListResult<any>> {
+  const yearParam = year
+    ? mode === "tv"
+      ? `&first_air_date_year=${year}`
+      : `&primary_release_year=${year}`
+    : "";
+  return tmdbFetch(
+    `/discover/${mode}?with_genres=${genreId}&sort_by=popularity.desc&page=${page}${yearParam}`,
+  );
+}
+
+export async function discoverByYear(
+  year: number,
+  page = 1,
+  mode: "movie" | "tv" = "movie",
+): Promise<TmdbListResult<any>> {
+  const yearParam =
+    mode === "tv"
+      ? `&first_air_date_year=${year}`
+      : `&primary_release_year=${year}`;
+  return tmdbFetch(
+    `/discover/${mode}?sort_by=popularity.desc&page=${page}${yearParam}`,
+  );
 }
 
 export async function getGenres(): Promise<Genre[]> {

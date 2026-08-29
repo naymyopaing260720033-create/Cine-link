@@ -5,7 +5,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useSearch } from "wouter";
-import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { Search as SearchIcon, Loader2, Filter, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SiteLayout from "@/components/SiteLayout";
@@ -17,6 +17,7 @@ import {
   searchMovies,
   searchSeries,
   discoverByGenre,
+  discoverByYear,
   getGenres,
   getPopular,
   getPopularSeries,
@@ -33,6 +34,7 @@ export default function Search() {
   const [searching, setSearching] = useState(false);
   const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
   const [activeGenre, setActiveGenre] = useState<number | null>(null);
+  const [activeYear, setActiveYear] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const searchParams = useSearch();
@@ -58,7 +60,12 @@ export default function Search() {
     let cancelled = false;
     const trimmed = query.trim();
 
-    if (!trimmed && !activeGenre) {
+    // Reset results when starting new search
+    if (page === 1 && !searching) {
+      setResults(null);
+    }
+
+    if (!trimmed && !activeGenre && !activeYear) {
       const fn =
         mode === "tv"
           ? () => getPopularSeries(page)
@@ -77,14 +84,22 @@ export default function Search() {
     }
 
     setSearching(true);
-    const fn = trimmed
-      ? mode === "tv"
+    
+    let fn;
+    if (trimmed) {
+      fn = mode === "tv"
         ? () => searchSeries(trimmed, page)
-        : () => searchMovies(trimmed, page)
-      : () => discoverByGenre(activeGenre!, page);
+        : () => searchMovies(trimmed, page);
+    } else if (activeGenre) {
+      fn = () => discoverByGenre(activeGenre, page, mode, activeYear || undefined);
+    } else if (activeYear) {
+      fn = () => discoverByYear(activeYear, page, mode);
+    } else {
+      fn = mode === "tv" ? () => getPopularSeries(page) : () => getPopular(page);
+    }
 
     fn()
-      .then((data) => {
+      .then((data: any) => {
         if (!cancelled) {
           setResults(data.results);
           setTotalPages(Math.min(data.total_pages, 500));
@@ -98,15 +113,27 @@ export default function Search() {
     return () => {
       cancelled = true;
     };
-  }, [query, activeGenre, page, mode]);
+  }, [query, activeGenre, activeYear, page, mode]);
 
   const title = useMemo(() => {
     const prefix = mode === "tv" ? "Series" : "Films";
     if (query.trim()) return `Results for "${query.trim()}"`;
-    if (activeGenre)
-      return genres.find((g) => g.id === activeGenre)?.name ?? "Genre";
+    let parts = [];
+    if (activeGenre) parts.push(genres.find((g) => g.id === activeGenre)?.name ?? "Genre");
+    if (activeYear) parts.push(activeYear.toString());
+    
+    if (parts.length > 0) return parts.join(" · ");
     return `Popular ${prefix}`;
-  }, [query, activeGenre, genres, mode]);
+  }, [query, activeGenre, activeYear, genres, mode]);
+
+  const years = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let y = currentYear; y >= 1990; y--) {
+      years.push(y);
+    }
+    return years;
+  }, []);
 
   return (
     <SiteLayout>
@@ -129,26 +156,58 @@ export default function Search() {
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-2">
-          {genres.map((g) => (
-            <Button
-              key={g.id}
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setActiveGenre((prev) => (prev === g.id ? null : g.id));
-                setPage(1);
-                setQuery("");
-              }}
-              className={
-                activeGenre === g.id
-                  ? "marquee-chip border-primary text-primary bg-primary/10"
-                  : "border-border text-muted-foreground hover:text-gold hover:border-primary/50"
-              }
-            >
-              {g.name}
-            </Button>
-          ))}
+        <div className="space-y-4 mb-8">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold/80 mb-2">
+            <Filter className="h-3 w-3" />
+            Filter by Genre
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {genres.map((g) => (
+              <Button
+                key={g.id}
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setActiveGenre((prev) => (prev === g.id ? null : g.id));
+                  setPage(1);
+                  setQuery("");
+                }}
+                className={
+                  activeGenre === g.id
+                    ? "marquee-chip border-primary text-primary bg-primary/10"
+                    : "border-border text-muted-foreground hover:text-gold hover:border-primary/50"
+                }
+              >
+                {g.name}
+              </Button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold/80 mb-2 pt-2">
+            <Calendar className="h-3 w-3" />
+            Filter by Year
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {years.map((y) => (
+              <Button
+                key={y}
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setActiveYear((prev) => (prev === y ? null : y));
+                  setPage(1);
+                  setQuery("");
+                }}
+                className={
+                  activeYear === y
+                    ? "marquee-chip border-primary text-primary bg-primary/10"
+                    : "border-border text-muted-foreground hover:text-gold hover:border-primary/50"
+                }
+              >
+                {y}
+              </Button>
+            ))}
+          </div>
         </div>
       </section>
 
