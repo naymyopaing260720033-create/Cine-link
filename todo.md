@@ -375,3 +375,16 @@
 - [x] Audit codebase for sensitive secrets before GitHub push.
 - [x] Push latest validated code to `naymyopaing260720033-create/Cine-link` main branch.
 - [x] Verify GitHub push success and provide repository link to the user.
+
+## Bug Fix: Preview Access
+
+- [x] Check the current development server status and preview URL.
+- [x] Restart or recover the preview service if it is unavailable.
+- [x] Verify the preview URL in desktop and mobile browser captures before sharing it again.
+- [x] Record the working preview link and access guidance.
+
+```text
+[Added after user reported that the project preview could not be opened.]
+```
+
+- [x] Confirm the current project preview is accessible to the user.
